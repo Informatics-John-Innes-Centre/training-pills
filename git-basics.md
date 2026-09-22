@@ -1,31 +1,28 @@
 # Git Basics for Researchers
 
-## Git for tracking research scripts
+## Tracking your research scripts with Git
 
-**Duration:** 1 hour
-**Audience:** Science/biological researchers who write or use scripts
-**Level:** Beginner
+**Time:** about 1 hour
+**Level:** Beginner — no prior Git experience needed
 
-### Training aim
+By the end of this tutorial, you will be able to:
 
-By the end of this session, participants should be able to:
-
-- Understand why Git is useful for research scripts
+- Explain why Git is useful for research scripts
 - Create a Git repository
 - Track changes to a script
 - Create commits with meaningful messages
-- View the history of their work
+- View the history of your work
 - Push a repository to GitLab
 
-The main idea:
+The main idea to take away:
 
 > **Git gives you a history of your scripts, so you can see what changed and go back to an earlier version.**
 
 ---
 
-## 1. Why Git? — 0–5 min
+## 1. Why Git?
 
-Start with a familiar problem:
+You've probably seen (or written) something like this:
 
 ```text
 analysis.py
@@ -35,7 +32,7 @@ analysis_v2_final2.py
 analysis_v2_final_REALLY_FINAL.py
 ```
 
-Git provides a history of the same script instead:
+Git replaces this with a single script that carries its own history:
 
 ```text
         change        change        change
@@ -43,24 +40,22 @@ Git provides a history of the same script instead:
 Version 1 ────── Version 2 ────── Version 3
 ```
 
-Why is this useful for researchers?
+Why this is useful for you as a researcher:
 
-- Keep a history of scripts
-- See what changed
-- Go back to an earlier version
+- Keep a history of your scripts
+- See exactly what changed and when
+- Go back to an earlier version if something breaks
 - Experiment without losing previous work
 - Share scripts with colleagues
-- Make computational work more reproducible
+- Make your computational work more reproducible
 
-The focus of this training is tracking scripts, not becoming a software developer.
+This tutorial focuses on tracking scripts, not on becoming a software developer — you only need a handful of commands.
 
-## 2. Git vs GitLab — 5–10 min
+## 2. Git vs GitLab
 
-**Git** is the version-control system running on your computer.
+**Git** is the version-control system that runs on your computer.
 
-**GitLab** can store and share your Git repository.
-
-Basic idea:
+**GitLab** is where you can store and share your Git repository with others.
 
 ```text
 Your computer                 JIC GitLab
@@ -72,11 +67,11 @@ Your computer                 JIC GitLab
      │◄───────────────────────────┤
 ```
 
-For this training, we will first work locally and then push the repository to GitLab.
+In this tutorial, you will first work locally and then push your repository to GitLab.
 
-## 3. Create your first repository — 10–25 min
+## 3. Create your first repository
 
-We will use a small example research project.
+You'll use a small example research project:
 
 ```text
 plant-analysis/
@@ -103,13 +98,11 @@ This tells Git: "Start tracking this directory as a Git repository."
 git status
 ```
 
-> **Important:** `git status` is your friend. When you are unsure what is happening, run `git status`.
+> **Tip:** `git status` is your friend. Whenever you're unsure what's happening, run `git status`.
 
 ## 4. Make your first commit
 
-Git does not automatically save every change you make.
-
-There are two steps before a change becomes part of the repository history:
+Git does not automatically save every change you make. There are two steps before a change becomes part of the repository's history:
 
 ```text
 Working directory
@@ -155,9 +148,9 @@ You should see something similar to:
 3c92a11 Add initial analysis script
 ```
 
-## 5. Make a change — 25–40 min
+## 5. Make a change
 
-Now modify `analyse.py`. For example, change the analysis or add another calculation.
+Now modify `analyse.py` — for example, change the analysis or add another calculation.
 
 **Check what changed**
 
@@ -166,7 +159,7 @@ git status
 git diff
 ```
 
-`git diff` shows the changes you have made since the last commit. This is particularly useful when working with research scripts because you can see exactly what changed.
+`git diff` shows the changes you've made since the last commit. This is especially useful with research scripts, because you can see exactly what changed.
 
 **Save the new version**
 
@@ -181,7 +174,7 @@ Check the history again:
 git log --oneline
 ```
 
-You should now have something similar to:
+You should now see something similar to:
 
 ```text
 a82f123 Update analysis
@@ -192,7 +185,7 @@ Every commit represents a version of your work.
 
 ## 6. The basic Git workflow
 
-The most important workflow from this training is:
+The one workflow to take away from this tutorial:
 
 ```text
 EDIT
@@ -215,7 +208,7 @@ git add .
 git commit -m "Describe what changed"
 ```
 
-**Good commit messages** try to describe the actual change:
+**Write good commit messages** that describe the actual change:
 
 - `Add filtering for low-quality samples`
 - `Fix calculation of mean expression`
@@ -224,9 +217,9 @@ git commit -m "Describe what changed"
 
 Avoid vague messages such as `changes`, `update`, `fix`, `stuff`, `final`.
 
-## 7. Push the repository to GitLab — 40–50 min
+## 7. Push your repository to GitLab
 
-Once the local repository is working, connect it to a remote GitLab repository.
+Once your local repository is working, connect it to a remote GitLab repository.
 
 **Add the remote repository**
 
@@ -257,7 +250,7 @@ Open the repository in GitLab. You should now be able to see:
 
 ## 8. Make another change and push it
 
-Modify the script again. Then:
+Modify the script again, then:
 
 ```bash
 git status
@@ -267,9 +260,9 @@ git commit -m "Update analysis parameters"
 git push
 ```
 
-Refresh GitLab. The new commit should now appear in the repository history.
+Refresh GitLab — the new commit should now appear in the repository history.
 
-## 9. Looking back at previous versions — 50–55 min
+## 9. Looking back at previous versions
 
 View the history:
 
@@ -297,13 +290,13 @@ For example:
 git show 3c92a11
 ```
 
-This allows you to see what was included in an earlier version.
+This lets you see exactly what was included in an earlier version.
 
 > **Key concept:** A commit is a saved snapshot of your work. The more meaningful your commits are, the easier it is to understand the history later.
 
-## 10. The Git survival kit — 55–60 min
+## 10. Your Git survival kit
 
-These are the commands to remember after the training:
+These are the commands to remember after this tutorial:
 
 | Command | What it does |
 | --- | --- |
@@ -332,15 +325,15 @@ These are the commands to remember after the training:
          git push
 ```
 
-### Practical exercise
+## Practice exercise
 
-During the session, participants should complete the following:
+Work through the following steps yourself to make sure everything sticks:
 
 - [ ] Create a project directory
 - [ ] Run `git init`
 - [ ] Check the repository with `git status`
 - [ ] Add a research script
-- [ ] Create the first commit
+- [ ] Create your first commit
 - [ ] Modify the script
 - [ ] Use `git diff`
 - [ ] Create a second commit
