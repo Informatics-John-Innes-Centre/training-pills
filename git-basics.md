@@ -2,7 +2,7 @@
 
 ## Tracking your research scripts with Git
 
-**Time:** about 1 hour
+**Time:** about 75–90 minutes
 **Level:** Beginner — no prior Git experience needed
 
 By the end of this tutorial, you will be able to:
@@ -10,9 +10,11 @@ By the end of this tutorial, you will be able to:
 - Explain why Git is useful for research scripts
 - Create a Git repository
 - Track changes to a script
+- Tell Git to ignore files you don't want tracked
 - Create commits with meaningful messages
 - View the history of your work
 - Push a repository to GitLab
+- Use a branch to try out changes safely
 
 The main idea to take away:
 
@@ -183,7 +185,52 @@ a82f123 Update analysis
 
 Every commit represents a version of your work.
 
-## 6. The basic Git workflow
+## 6. Ignoring files with `.gitignore`
+
+`git add .` stages *everything* in the directory — including files you probably don't want in your Git history, such as:
+
+- Large or raw data files (`*.csv`, `*.fastq`, `results/`)
+- Generated output (plots, `*.png`, `*.pdf`)
+- Cache and temporary files (`__pycache__/`, `.ipynb_checkpoints/`, `.Rhistory`)
+- Environment or secret files (`.env`, credentials, API keys)
+- Editor/OS clutter (`.DS_Store`, `.vscode/`)
+
+Committing these bloats your repository, and secrets should never end up in Git history at all.
+
+**Step 1 — Create a `.gitignore` file** in the root of your project:
+
+```bash
+touch .gitignore
+```
+
+**Step 2 — List the files and folders to ignore**, one pattern per line:
+
+```text
+__pycache__/
+.ipynb_checkpoints/
+*.csv
+results/
+.env
+```
+
+**Step 3 — Check the effect**
+
+```bash
+git status
+```
+
+Ignored files no longer show up as untracked, even after `git add .`.
+
+**Step 4 — Commit the `.gitignore` file itself**, so the rules are shared with anyone who clones the repository:
+
+```bash
+git add .gitignore
+git commit -m "Add .gitignore"
+```
+
+> **Important:** `.gitignore` only affects files that are not already tracked. If a file was committed *before* you added it to `.gitignore`, Git will keep tracking it until you explicitly remove it with `git rm --cached <file>`.
+
+## 7. The basic Git workflow
 
 The one workflow to take away from this tutorial:
 
@@ -217,7 +264,7 @@ git commit -m "Describe what changed"
 
 Avoid vague messages such as `changes`, `update`, `fix`, `stuff`, `final`.
 
-## 7. Push your repository to GitLab
+## 8. Push your repository to GitLab
 
 Once your local repository is working, connect it to a remote GitLab repository.
 
@@ -248,7 +295,7 @@ Open the repository in GitLab. You should now be able to see:
 - Your commits
 - The history of your project
 
-## 8. Make another change and push it
+## 9. Make another change and push it
 
 Modify the script again, then:
 
@@ -262,7 +309,69 @@ git push
 
 Refresh GitLab — the new commit should now appear in the repository history.
 
-## 9. Looking back at previous versions
+## 10. Working with branches
+
+So far, every commit has gone straight onto your main line of history (`main`). A **branch** lets you try something out — a new analysis approach, a risky refactor — without touching the working version of your script.
+
+```text
+                  ┌── new-analysis: try alternative method
+                  │
+main ─────●───────●──────────────●───────► (unaffected, still works)
+          │                      │
+          └── you create the branch here, and merge back here
+```
+
+**Step 1 — Create and switch to a new branch**
+
+```bash
+git checkout -b new-analysis
+```
+
+This creates a branch called `new-analysis` and moves you onto it. Your files are unchanged, but any commits you make now only exist on this branch.
+
+**Step 2 — Work as normal**
+
+```bash
+# edit analyse.py
+git status
+git add .
+git commit -m "Try alternative normalisation method"
+```
+
+**Step 3 — Switch back to `main` at any time**
+
+```bash
+git checkout main
+```
+
+Notice that your script reverts to the `main` version — the changes are safely tucked away on `new-analysis` until you're ready for them.
+
+**Step 4 — If the new approach works, merge it back into `main`**
+
+```bash
+git checkout main
+git merge new-analysis
+```
+
+**Step 5 — If you want to share the branch on GitLab**
+
+```bash
+git push -u origin new-analysis
+```
+
+This lets colleagues review your work (e.g. via a GitLab merge request) before it becomes part of `main`.
+
+**See which branch you're on, or list all branches:**
+
+```bash
+git branch
+```
+
+The branch with a `*` next to it is the one you're currently on.
+
+> **Why this matters for research:** branches let you try a different statistical method, a new set of parameters, or a reanalysis — without risking the version of the script that already works.
+
+## 11. Looking back at previous versions
 
 View the history:
 
@@ -294,7 +403,7 @@ This lets you see exactly what was included in an earlier version.
 
 > **Key concept:** A commit is a saved snapshot of your work. The more meaningful your commits are, the easier it is to understand the history later.
 
-## 10. Your Git survival kit
+## 12. Your Git survival kit
 
 These are the commands to remember after this tutorial:
 
@@ -306,6 +415,10 @@ These are the commands to remember after this tutorial:
 | `git commit -m "message"` | Save a version |
 | `git push` | Send commits to GitLab |
 | `git log --oneline` | Show the history |
+| `.gitignore` | List files Git should never track |
+| `git checkout -b <name>` | Create and switch to a new branch |
+| `git checkout <name>` | Switch to an existing branch |
+| `git merge <name>` | Bring a branch's changes into your current branch |
 
 **The workflow to remember:**
 
@@ -337,8 +450,14 @@ Work through the following steps yourself to make sure everything sticks:
 - [ ] Modify the script
 - [ ] Use `git diff`
 - [ ] Create a second commit
+- [ ] Create a `.gitignore` file and add a couple of patterns to it
+- [ ] Confirm the ignored files don't appear in `git status`
+- [ ] Commit the `.gitignore` file
 - [ ] View the history with `git log --oneline`
 - [ ] Create/connect a GitLab repository
 - [ ] Push the repository to GitLab
-- [ ] Make another change
+- [ ] Create a new branch and make a commit on it
+- [ ] Switch back to `main` and confirm your script reverts
+- [ ] Merge the branch back into `main`
+- [ ] Make another change on `main`
 - [ ] Commit and push it
