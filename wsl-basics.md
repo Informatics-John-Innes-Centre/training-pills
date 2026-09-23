@@ -8,7 +8,7 @@
 By the end of this tutorial, you will be able to:
 
 - Explain why WSL is useful for bioinformatics work on a Windows machine
-- Install WSL (and know when you'll need IT's help to do it)
+- Install WSL (and know when you'll need Computing's help to do it)
 - Complete first-time setup and update your Linux environment
 - Find your way between the Windows and Linux file systems
 - Mount extra drives and network shares into `/mnt/` and access them
@@ -37,9 +37,9 @@ This means:
 **Installing WSL requires administrator rights on your Windows machine.** It enables a Windows feature (virtualisation-based Linux support), which isn't something a standard user account is allowed to do.
 
 - If you're a local administrator on your laptop, you can install it yourself (Section 3).
-- If you're not (common on managed JIC laptops), you'll need IT to either install it for you or grant temporary admin rights so you can run the install command yourself.
+- If you're not (common on managed JIC laptops), you'll need Computing to either install it for you or grant temporary admin rights so you can run the install command yourself.
 
-> **Don't skip this step and try to work around it** — there isn't a reliable non-admin way to install WSL, so raise a ticket with IT early if you think you'll need one.
+> **Don't skip this step and try to work around it** — there isn't a reliable non-admin way to install WSL, so raise a ticket with Computing early if you think you'll need one.
 
 ## 3. Installing WSL
 
@@ -219,7 +219,7 @@ Not here:                 /mnt/c/...  (Windows file system) — slow from Linux
 
 Work through the following steps yourself to make sure everything sticks:
 
-- [ ] Confirm whether you have local admin rights; if not, raise a ticket with IT
+- [ ] Confirm whether you have local admin rights; if not, raise a ticket with Computing
 - [ ] Run `wsl --install` from an administrator PowerShell window
 - [ ] Restart your computer and complete first-time Ubuntu setup (Linux username/password)
 - [ ] Run `sudo apt update && sudo apt upgrade -y`
