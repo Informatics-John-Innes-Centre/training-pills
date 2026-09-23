@@ -53,11 +53,18 @@ You                     Slurm                    Compute nodes
 
 A compute node starts with a bare environment — it doesn't automatically have the same software loaded as your interactive login shell. Load whatever your job depends on inside the script itself, not just in your terminal beforehand.
 
-**Environment modules** (common on many HPCs)
+**Lmod** — the module system used here. `ml` is shorthand for `module load`:
 
 ```bash
-module load samtools/1.19
-module load python/3.11
+ml samtools/1.19
+ml python/3.11
+```
+
+Not sure of the exact module name or version? Search the **HPC Software Catalogue**:
+
+```bash
+catalogue --search samtools
+source package <ID>   # loads a catalogue package by the ID it gives you
 ```
 
 **Or a conda/mamba environment**
@@ -74,13 +81,13 @@ conda activate rnaseq-env
 ```bash
 #!/bin/bash
 #SBATCH --job-name=my-analysis
-#SBATCH --partition=short
+#SBATCH --partition=jic-short
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=8G
 #SBATCH --time=01:00:00
 #SBATCH --output=my-analysis-%j.log
 
-module load python/3.11
+ml python/3.11
 
 echo "Running on $(hostname)"
 python my_script.py
@@ -123,7 +130,7 @@ interactive
 
 This puts you on a compute node with an interactive shell, so you can run commands one at a time, check that paths and modules are correct, and debug errors as they happen — rather than waiting for a queued batch job to fail and then reading the log.
 
-> **Keep it alive:** an interactive session is tied to your terminal, so it dies if your connection drops. Run it inside `tmux` (or `screen` on a data mover node) so you can detach and reattach safely — see the `tmux-basics` pill.
+> **Keep it alive:** an interactive session is tied to your terminal, so it dies if your connection drops. Run it inside `tmux` (or `screen` on a data mover node) so you can detach and reattach safely.
 
 ## 7. Job arrays — one script, many samples
 
@@ -132,7 +139,7 @@ Bioinformatics work is usually "run the same thing on every sample." Rather than
 ```bash
 #!/bin/bash
 #SBATCH --job-name=align
-#SBATCH --partition=short
+#SBATCH --partition=jic-short
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=8G
 #SBATCH --time=01:00:00
@@ -141,7 +148,7 @@ Bioinformatics work is usually "run the same thing on every sample." Rather than
 
 SAMPLE=$(sed -n "${SLURM_ARRAY_TASK_ID}p" samples.txt)
 
-module load bwa samtools
+ml bwa samtools
 bwa mem ref.fa "${SAMPLE}_R1.fastq.gz" "${SAMPLE}_R2.fastq.gz" \
   | samtools sort -o "${SAMPLE}.bam"
 ```
@@ -192,7 +199,7 @@ tail -n 50 my-analysis-123456.log
 
 - **Out of memory** — the log (or `sacct -j <jobid> --format=State`) shows `OUT_OF_MEMORY`, or the process is simply killed with no clear error. Re-run with a higher `--mem`, informed by what `seff` showed for a similar job.
 - **Exceeded the time limit** — `State` shows `TIMEOUT`. Increase `--time`, or check whether the job is genuinely stuck rather than just slow.
-- **Software not found** — the script ran, but a command failed immediately. Check that the right `module load`/`conda activate` is actually inside the script (Section 3), not just run in your interactive shell beforehand.
+- **Software not found** — the script ran, but a command failed immediately. Check that the right `ml`/`source package`/`conda activate` is actually inside the script (Section 3), not just run in your interactive shell beforehand.
 
 ## 11. A few habits worth building
 
