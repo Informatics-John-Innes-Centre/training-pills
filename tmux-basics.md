@@ -26,7 +26,7 @@ The main idea to take away:
 You've probably had this happen:
 
 ```text
-$ ssh cluster
+$ ssh hpc.nbi.ac.uk
 $ interactive
 $ python debug_pipeline.py
 ...
@@ -165,7 +165,7 @@ tmux new -s transfer
 **Copy the data with `rsync`**
 
 ```bash
-rsync -avP /data/raw_reads/ user@remote-server:/data/project/raw_reads/
+rsync -avP /data/raw_reads/ user@hpc.nbi.ac.uk:/data/project/raw_reads/
 ```
 
 `-P` shows a progress bar and, importantly, allows the transfer to **resume** if it gets interrupted, instead of starting again from scratch.
@@ -187,7 +187,7 @@ tmux attach -t transfer
 ## 8. A typical bioinformatics workflow
 
 ```text
-ssh cluster
+ssh hpc.nbi.ac.uk
 sbatch assembly.sh              (job runs on a compute node, managed by Slurm —
   ↓                              this part survives disconnects on its own)
 tmux new -s monitor
@@ -199,7 +199,7 @@ Ctrl-b d                 (detach, log off, go home)
   ↓
 ... hours later ...
   ↓
-ssh cluster
+ssh hpc.nbi.ac.uk
 tmux attach -t monitor    (check progress / see if it finished)
   ↓
 tmux kill-session -t monitor   (once finished)

@@ -279,7 +279,7 @@ git remote add origin <repository-url>
 For example:
 
 ```bash
-git remote add origin https://gitlab.example.ac.uk/username/plant-analysis.git
+git remote add origin https://git.nbi.ac.uk/username/plant-analysis.git
 ```
 
 **Push your repository**
