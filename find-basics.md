@@ -10,7 +10,7 @@ By the end of this tutorial, you will be able to:
 - Search a directory tree for files matching a name or pattern
 - Filter by file type, size, or modification time
 - Safely preview matches before acting on them
-- Run a command on every match with `-exec`
+- Run a command on every match with `-exec` — including deleting or moving matches into a folder
 
 The main idea to take away:
 
@@ -156,6 +156,13 @@ find . -name "*.tmp"
 find . -name "*.tmp" -delete
 ```
 
+**Move matches into a folder** — e.g. tidying old logs into an `archive/` subfolder instead of deleting them outright
+
+```bash
+mkdir -p archive/
+find . -maxdepth 1 -name "*.log" -exec mv {} archive/ \;
+```
+
 **Run a command on every match with `-exec`**
 
 ```bash
@@ -204,6 +211,7 @@ Locate what's large and old, compress what's still uncompressed, checksum it, th
 | `find . -maxdepth 1 ...` | Don't recurse past a given depth |
 | `find . -name "*.ext" -delete` | Delete matches (preview first!) |
 | `find . -name "*.ext" -exec CMD {} \;` | Run `CMD` on every match |
+| `find . -name "*.ext" -exec mv {} dest/ \;` | Move matches into another folder |
 | `find . -size +1G -mtime +90` | Large + old files — cleanup/archiving candidates |
 | `find . -name "*.fastq" ! -name "*.gz"` | Files not yet compressed |
 | `find . -name "*_R1_*.fastq.gz"` | One entry per paired-end sample |
@@ -219,6 +227,7 @@ Work through the following steps yourself to make sure everything sticks:
 - [ ] Find files modified in the last few minutes with `-mmin -5`
 - [ ] Preview a `-delete` candidate list before ever adding `-delete`
 - [ ] Use `-exec` to run a simple command (e.g. `ls -l {}`) on every match
+- [ ] Use `-exec ... mv {} dest/ \;` to move matches into a new folder instead of deleting them
 - [ ] Combine `-size` and `-mtime` to shortlist large, old files as cleanup candidates
 - [ ] Use `!` to find files matching one pattern but not another (e.g. uncompressed vs compressed)
 - [ ] Generate a `checksums.txt` for a set of matches using `find ... -exec md5sum {} \;`
