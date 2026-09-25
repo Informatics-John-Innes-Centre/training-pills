@@ -94,7 +94,7 @@ cd project/results
 An **absolute** path always starts from the very top (`/`), and means the same thing regardless of where you currently are:
 
 ```bash
-cd /nbi/scratch/username/project/results
+cd /jic/scratch/groups/Group-Leader/username/project/results
 ```
 
 `~` is shorthand for your home directory, and can be used inside a path too:
@@ -159,7 +159,7 @@ cp -r project/ project_backup/
 
 ```bash
 mv draft.txt final.txt
-mv sample.fastq.gz /nbi/scratch/username/raw_reads/
+mv sample.fastq.gz /jic/scratch/groups/Group-Leader/username/raw_reads/
 ```
 
 Unlike `cp`, `mv` doesn't leave a copy behind — the file exists in exactly one place, just with a new name or location.
