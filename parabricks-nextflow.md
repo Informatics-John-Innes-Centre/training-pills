@@ -3,7 +3,7 @@
 ## From FASTQ files to a cohort VCF with parabricks-germline-nf
 
 **Time:** about 45–60 minutes (plus queue time for the GPU test)
-**Level:** Intermediate — assumes you have done the [Slurm](slurm-basics.md) and [git](git-basics.md) pills and have used conda
+**Level:** Intermediate — assumes you have done the [Slurm](slurm-basics.md), [git](git-basics.md), [conda](conda-basics.md) and [Singularity](singularity-basics.md) pills
 
 By the end of this tutorial, you will be able to:
 
@@ -76,12 +76,16 @@ Repository: `https://git.nbi.ac.uk/workflows/parabricks-germline-nf`
 
 ## 4. One-time setup
 
-**Nextflow in a conda environment**
+> **Internet access:** `software23` is the only node with internet access. Anything that downloads (creating the conda environment, building containers) has to be done there: `ssh software23`. Running the pipeline happens everywhere else, offline.
+
+**Nextflow in a conda environment.** If you haven't used conda on the HPC yet, do the [conda](conda-basics.md) pill first: it covers the `~/.condarc` channel setup that JIC requires (Anaconda's own channels are blocked). Then, on `software23`:
 
 ```bash
-conda create -n nf-env -c conda-forge -c bioconda nextflow
+ssh software23
+conda create -n nf-env nextflow
 conda activate nf-env
 nextflow -version
+exit
 ```
 
 **Clone the pipeline** (into scratch, where there is space for the work directory)
@@ -94,7 +98,7 @@ cd parabricks-germline-nf
 
 **Work offline**
 
-Compute nodes have no internet access. Without the line below, Nextflow can sit for minutes trying to download things before giving up:
+Apart from `software23`, nodes have no internet access. Without the line below, Nextflow can sit for minutes trying to download things before giving up:
 
 ```bash
 export NXF_OFFLINE=true
@@ -104,16 +108,19 @@ The launcher script (Section 8) sets this for you; you only need it when running
 
 ## 5. Containers
 
-The images are too big for git (Parabricks alone is several GB), so the repo holds small **recipe files** (`containers/*.def`) instead.
+Every step runs inside a Singularity container, so you don't install BWA, Parabricks or bcftools yourself. The [Singularity](singularity-basics.md) pill explains how containers work. The images are too big for git (Parabricks alone is several GB), so the repo holds small **definition files** (`containers/*.def`) instead.
 
 - **Using the shared copy:** the `jic` profile already points at pre-built `.sif` images, so there's nothing to do.
-- **Building your own** (on a node with internet access):
+- **Building your own:** building needs internet and root rights, both available on `software23`:
 
 ```bash
+ssh software23
+cd /jic/scratch/groups/<your-group>/<you>/parabricks-germline-nf
 containers/build.sh /jic/scratch/groups/<your-group>/sif
+exit
 ```
 
-This builds the four images, tests each one and writes a `containers.yml`. Then add `--container_dir /jic/scratch/groups/<your-group>/sif` to your runs.
+This builds the four images from the `.def` files (Parabricks is the slow one), tests each one and writes a `containers.yml`. Put them somewhere your group can share, then add `--container_dir /jic/scratch/groups/<your-group>/sif` to your runs. The pipeline then uses these local files and never needs internet.
 
 ## 6. Your samplesheet
 
@@ -251,6 +258,7 @@ Sample columns in every merged VCF are sorted by `sample_id`.
 
 | Command | What it does |
 | --- | --- |
+| `ssh software23` | The only node with internet: for conda installs and container builds |
 | `conda activate nf-env` | Make `nextflow` available |
 | `export NXF_OFFLINE=true` | Stop Nextflow trying to reach the internet |
 | `nextflow run . -profile test,stub -stub` | Dry run: check the setup in seconds |
@@ -264,7 +272,7 @@ Sample columns in every merged VCF are sorted by `sample_id`.
 
 Work through the following steps yourself to make sure everything sticks:
 
-- [ ] Create the `nf-env` conda environment and check `nextflow -version`
+- [ ] On `software23`, create the `nf-env` conda environment and check `nextflow -version`
 - [ ] Clone the repository into your scratch space
 - [ ] Run the dry run (`-profile test,stub -stub`) in an `interactive` session and get all ✔
 - [ ] Submit the tiny GPU test with `scripts/submit_slurm.sh` and follow it with `tail -f`
