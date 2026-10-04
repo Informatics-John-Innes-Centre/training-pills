@@ -1,0 +1,26 @@
+# Groups pills on the index page. Add new pills' filenames (no .md) under a
+# category here; anything not listed falls into "Other" automatically, so a
+# new pill never just disappears if this file isn't updated right away.
+
+Linux & Command Line:
+  - linux-basics
+  - wsl-basics
+  - nano-basics
+  - shell-scripting-basics
+  - find-basics
+  - grep-sed-awk-basics
+  - pipes-redirection-basics
+  - compression-basics
+  - md5sum-basics
+  - tmux-basics
+  - rsync-basics
+
+HPC & Scientific Computing:
+  - slurm-basics
+  - conda-basics
+  - singularity-basics
+  - parabricks-nextflow
+  - software-basics
+
+Version Control:
+  - git-basics
