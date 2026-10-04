@@ -19,8 +19,10 @@ HPC & Scientific Computing:
   - slurm-basics
   - conda-basics
   - singularity-basics
-  - parabricks-nextflow
   - software-basics
+
+Bioinformatics:
+  - parabricks-nextflow
 
 Version Control:
   - git-basics
