@@ -36,7 +36,7 @@ It does this with **environments**: separate folders, each with its own set of t
 
 Activating an environment puts its tools first on your `PATH`; deactivating it removes them. Environments can't break each other, so a tool that needs an old Python can't break your other analyses.
 
-> **Conda or `ml`?** If the tool is already in the HPC Software Catalogue (see the [Slurm](slurm-basics.md) pill), `ml` is simpler. Use conda when it isn't there, when you need a different version, or when you want a set of tools pinned together for a project.
+> **Conda or `ml`?** If the tool is already available as a module or in the HPC Software Catalogue (see the [Software](software-basics.md) pill), loading it that way is simpler. Use conda when it isn't there, when you need a different version, or when you want a set of tools pinned together for a project.
 
 ## 2. Two JIC-specific rules
 

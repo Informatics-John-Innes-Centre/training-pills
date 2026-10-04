@@ -51,7 +51,7 @@ You                     Slurm                    Compute nodes
 
 ## 3. Loading the software your job needs
 
-A compute node starts with a bare environment — it doesn't automatically have the same software loaded as your interactive login shell. Load whatever your job depends on inside the script itself, not just in your terminal beforehand.
+A compute node starts with a bare environment — it doesn't automatically have the same software loaded as your interactive login shell. Load whatever your job depends on inside the script itself, not just in your terminal beforehand. The [Software](software-basics.md) pill covers finding and loading software in more detail.
 
 **Lmod** — the module system used here. `ml` is shorthand for `module load`:
 

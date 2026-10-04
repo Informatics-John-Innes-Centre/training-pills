@@ -159,15 +159,22 @@ NF_CONDA_ENV=nf-env sbatch scripts/submit_slurm.sh -profile jic,test \
     --max_cpus 8 --max_memory '64 GB' --gpu_cpus 8 --gpu_memory '64 GB'
 ```
 
-When it finishes, check the merged VCF:
+> **Why the extra options?** The test data is tiny, so these shrink the requests. Without them the job would ask for 3.5 TB of local SSD and wait in the queue for an empty node.
+
+When it finishes, check the merged VCF. `bcftools` isn't available on the command line by default. The simplest option is the pipeline's own bcftools container, the same version that wrote the file:
 
 ```bash
-ml bcftools
-bcftools query -l results_test/merged/test.vcf.gz          # S1, S2, S3
-bcftools view -H results_test/merged/test.vcf.gz | wc -l   # about 34 variant sites
+BCFTOOLS="singularity exec /path/to/sif/bcftools-1.21.sif bcftools"   # your --container_dir
+$BCFTOOLS query -l results_test/merged/test.vcf.gz          # S1, S2, S3
+$BCFTOOLS view -H results_test/merged/test.vcf.gz | wc -l   # about 34 variant sites
 ```
 
-> **Why the extra options?** The test data is tiny, so these shrink the requests. Without them the job would ask for 3.5 TB of local SSD and wait in the queue for an empty node.
+Or load it as a module or a Software Catalogue package; the [Software](software-basics.md) pill explains both:
+
+```bash
+ml av bcftools                  # list the module versions, then e.g. ml bcftools/<version>
+catalogue --search bcftools     # or find it in the catalogue, then: source package <ID>
+```
 
 ## 8. A real run
 
@@ -266,7 +273,7 @@ Sample columns in every merged VCF are sorted by `sample_id`.
 | `tail -f nextflow_<jobid>.out` | Follow progress |
 | `cat work/<xx>/<hash>*/.command.err` | See why a task failed |
 | `containers/build.sh <dir>` | Build the container images yourself |
-| `bcftools query -l <vcf>` | List the samples in a VCF |
+| `singularity exec <sif_dir>/bcftools-1.21.sif bcftools query -l <vcf>` | List the samples in a VCF, using the pipeline's bcftools container |
 
 ## Practice exercise
 

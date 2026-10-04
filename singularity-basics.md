@@ -41,6 +41,8 @@ Why this helps:
 - **Nothing to install:** no conda solving, no dependency conflicts.
 - **Shareable:** you can put an image in a group folder and everyone uses the same one.
 
+> **Do you need a container?** For a quick analysis, a module or Software Catalogue package is often simpler (see the [Software](software-basics.md) pill). Containers shine when you need the exact same software everywhere, or a pipeline provides the images.
+
 > **Singularity and Apptainer** are the same tool under two names (Apptainer is the newer, community-maintained branch). Commands are identical; replace `singularity` with `apptainer` where that's what is installed. Docker is the other well-known container tool, but it isn't available on the HPC. Singularity can run Docker images, though.
 
 ## 2. Where images come from
