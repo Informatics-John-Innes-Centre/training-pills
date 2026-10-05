@@ -157,6 +157,7 @@ Every process should finish with a ✔.
 **Step 2: real GPU test on tiny data (a few minutes plus queue time)**
 
 ```bash
+cd /jic/scratch/groups/<your-group>/<you>/my-project
 NF_CONDA_ENV=nf-env sbatch $PIPE/scripts/submit_slurm.sh -profile jic,test \
     --jic_gpu_scratch_gb 50 --min_scratch_gb 0 \
     --max_cpus 8 --max_memory '64 GB' --gpu_cpus 8 --gpu_memory '64 GB'
@@ -211,6 +212,13 @@ squeue -u $USER                     # the head job + the task jobs it submitted
 tail -f nextflow_<jobid>.out        # the progress table
 ```
 
+The log starts with the pipeline version and the folder the run writes to:
+
+```text
+Pipeline: /jic/common/workflows/parabricks-germline-nf (386da2a)
+Run dir : /jic/scratch/groups/<your-group>/<you>/my-project
+```
+
 ```text
 [8d/1e7b43] BWA_INDEX (reference.fa)       | 1 of 1 ✔
 [d4/376aa8] PBRUN_GERMLINE (S3)            | 3 of 3 ✔
@@ -250,6 +258,8 @@ results/
 ├── vcf/                    <sample>.vcf.gz (+ .csi)
 ├── merged/per_contig/      <prefix>.<contig>.vcf.gz
 ├── merged/<prefix>.vcf.gz  all contigs, in reference order
+├── qc/flagstat/            mapping statistics (with --run_flagstat)
+├── reference/              BWA index + .fai, if they had to be built
 └── pipeline_info/          report, timeline, trace
 ```
 
@@ -262,7 +272,7 @@ Sample columns in every merged VCF are sorted by `sample_id`.
 - **Always run the dry run and the tiny GPU test first** on a new setup, before launching hundreds of samples.
 - **Always use `-resume`.** The launcher adds it for you.
 - **Keep the samplesheet and the exact command with your results**, so the analysis can be repeated.
-- **Note the pipeline version** (`git log -1` in the repo folder) in your methods.
+- **Note the pipeline version** in your methods. The first line of `nextflow_<jobid>.out` shows it, e.g. `Pipeline: /jic/common/workflows/parabricks-germline-nf (386da2a)`.
 - **Clean up `work/`** once a project is finished.
 
 ## 13. Your Parabricks pipeline survival kit
@@ -277,7 +287,7 @@ Sample columns in every merged VCF are sorted by `sample_id`.
 | `NF_CONDA_ENV=nf-env sbatch $PIPE/scripts/submit_slurm.sh -profile jic ...` | Launch a run (from your project folder) |
 | `tail -f nextflow_<jobid>.out` | Follow progress |
 | `cat work/<xx>/<hash>*/.command.err` | See why a task failed |
-| `containers/build.sh <dir>` | Build the container images yourself |
+| `containers/build.sh [dir]` | Build the container images yourself (on `software23`) |
 | `singularity exec $PIPE/containers/sif/bcftools-1.21.sif bcftools query -l <vcf>` | List the samples in a VCF, using the pipeline's bcftools container |
 
 ## Practice exercise
