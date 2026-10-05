@@ -108,6 +108,8 @@ conda env create -f environment.yml          # creates the "vision-dvc" environm
 conda activate vision-dvc
 ```
 
+> **GitLab asks for a password?** Over HTTPS it usually wants a **personal access token**, not your normal password: in GitLab, avatar → *Preferences* → *Access tokens*, with the `read_repository` and `write_repository` scopes. Paste the token when asked for the password. `git config --global credential.helper 'cache --timeout=28800'` remembers it for a working day.
+
 > **Already have a Nextflow environment** (e.g. `nf-env` from the Parabricks pill)? Add DVC to it instead: `conda install -n nf-env -c conda-forge dvc pyyaml`, then put `export NF_CONDA_ENV=nf-env` in your `~/.bashrc` so the launcher uses it.
 
 **Make it your own project.** Your experiments will be pushed to git, so point the clone at a repository of your own (create an empty one on git.nbi.ac.uk first):
@@ -125,9 +127,11 @@ git push -u origin main
 
 This builds `containers/vision-train.sif` (PyTorch, Ultralytics YOLO and timm). It takes 10–20 minutes and needs about 20 GB free in `/tmp`. It builds in `/tmp` because Singularity's `--fakeroot` builds can't read `/jic/scratch`: building in the project folder fails with *"Failed to restore current working directory: Permission denied"*.
 
+> **Build it on `software23`, but don't run it there.** On `software23`, Singularity can't see your project folders (*"Not mounting current directory: user bind control is disabled"*). That's fine: training runs the container on the GPU nodes, and nothing else needs it on `software23`.
+
 > **Share the image.** It's several GB. Build it once per group, keep it somewhere shared, and point each project to it with `--train_container /path/to/vision-train.sif`.
 
-**Pretrained models.** Download the models you want to compare. Compute nodes are offline, so this has to happen here:
+**Pretrained models.** Download the models you want to compare. Compute nodes are offline, so this has to happen here. It's plain Python, so the conda environment is all it needs:
 
 ```bash
 ./scripts/fetch_weights.sh yolo11n yolov8n                    # the two small ones used by the test
@@ -181,14 +185,31 @@ Your data can stay where it is: set `data.path` in `params.yaml` to the folder, 
 
 ## 6. Test before you scale up
 
-From a **login node** (not `software23`), in your project folder:
+This trains two tiny YOLO models for 3 epochs on a small bundled dataset of synthetic images (a few minutes plus queue time).
+
+For this first test, it's easiest to **watch it live** from an `interactive` session. Running the launcher with `bash` instead of `sbatch` keeps Nextflow on your screen, while training still goes to the GPU nodes as separate jobs:
+
+```bash
+interactive
+cd /jic/scratch/groups/<your-group>/<you>/my-project
+bash submit.sh -profile jic,test
+```
+
+```text
+[2b/a3cfb2] Submitted process > PLAN
+[c4/7a3c43] Submitted process > TRAIN (smoketest-yolov8n)
+[6d/ee5a30] Submitted process > TRAIN (smoketest-yolo11n)
+...
+```
+
+The session has to stay open until the run finishes. For real sweeps, which take hours, submit from a **login node** (not `software23`) instead:
 
 ```bash
 cd /jic/scratch/groups/<your-group>/<you>/my-project
 sbatch submit.sh -profile jic,test
 ```
 
-This trains two tiny YOLO models for 3 epochs on a small bundled dataset of synthetic images (a few minutes plus queue time). Follow it with:
+and follow it with:
 
 ```bash
 squeue -u $USER                 # the head job + the GPU jobs it submitted
@@ -334,6 +355,8 @@ Fix the cause and run `sbatch submit.sh` again. Thanks to `-resume`, finished tr
 - **`CUDA out of memory`:** lower `train.batch` or `train.imgsz`.
 - **`src/ or dvc.yaml changed since experiment…`:** you edited the code while a run was training. The experiment can't be recorded against code that didn't produce it. `git stash` your edits and resubmit: training is reused.
 - **`sbatch: command not found`:** you're on `software23`. Submit from a login node.
+- **`Authentication failed` on `git pull` or `git push`:** use a personal access token as the password (Section 4).
+- **`URL using bad/illegal format`:** the git remote mixes two styles. HTTPS uses a slash, `https://git.nbi.ac.uk/<group>/<repo>.git`; SSH uses a colon, `git@git.nbi.ac.uk:<group>/<repo>.git`. Fix it with `git remote set-url origin <correct URL>`.
 - **One model failed but the others finished:** a failed experiment is retried once and then skipped, so the rest of the sweep still completes. Its log is in the work directory listed in the head job's output.
 
 > **Don't delete `work/` while you are still running sweeps.** That's where `-resume` finds finished training. Once your experiments are recorded (they live in git and the DVC cache, not in `work/`), delete it to free space.
@@ -356,7 +379,7 @@ Fix the cause and run `sbatch submit.sh` again. Thanks to `-resume`, finished tr
 | `./containers/build.sh` | Build the training container (on `software23`) |
 | `./scripts/fetch_weights.sh yolo11m` | Download pretrained weights (on `software23`) |
 | `dvc add models/pretrained` | Version the pretrained weights |
-| `sbatch submit.sh -profile jic,test` | Five-minute check of the whole setup (from a login node) |
+| `bash submit.sh -profile jic,test` | Five-minute check of the whole setup, watched live (inside `interactive`) |
 | `sbatch submit.sh` | Run every experiment in `sweep.yaml` |
 | `tail -f logs/vision-train-<jobid>.out` | Follow progress |
 | `dvc exp show` | Compare all experiments |
@@ -373,7 +396,7 @@ Work through the following steps yourself to make sure everything sticks:
 - [ ] Set your git name and email, then clone the template on `software23` and create the conda environment
 - [ ] Build the container with `./containers/build.sh`
 - [ ] Fetch `yolo11n` and `yolov8n`, and version them with `dvc add models/pretrained`
-- [ ] From a login node, run `sbatch submit.sh -profile jic,test` and follow it with `tail -f`
+- [ ] In an `interactive` session, run `bash submit.sh -profile jic,test` and watch the jobs go through
 - [ ] Run `dvc exp show` and find the two `smoketest` experiments and their `count_mae`
 - [ ] Run `dvc exp apply smoketest-yolo11n` and look at `results/metrics.json` and `results/plots/counts.csv`
 - [ ] Run `predict.py` on `tests/data/count_tiny/images/test` with `--save-images` and look at the boxes
