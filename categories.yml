@@ -20,6 +20,7 @@ HPC & Scientific Computing:
   - conda-basics
   - singularity-basics
   - software-basics
+  - open-ondemand-basics
 
 Bioinformatics:
   - parabricks-nextflow
