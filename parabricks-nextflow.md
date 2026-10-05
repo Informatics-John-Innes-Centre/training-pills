@@ -10,7 +10,7 @@ By the end of this tutorial, you will be able to:
 - Describe the biology behind it: reads, alignment, variants and genotypes
 - Explain what the pipeline does, from FASTQ files to a multi-sample VCF
 - Explain the few Nextflow ideas you need: processes, the work directory, profiles and `-resume`
-- Set up Nextflow in a conda environment and clone the pipeline
+- Set up Nextflow in a conda environment and use the shared install of the pipeline
 - Get the container images, either pre-built or built from the recipes in the repo
 - Write a samplesheet for your own samples
 - Check your setup with a dry run, then with a small real GPU test
@@ -88,13 +88,15 @@ nextflow -version
 exit
 ```
 
-**Clone the pipeline** (into scratch, where there is space for the work directory)
+**The pipeline is already installed.** A shared copy lives in `/jic/common/workflows/parabricks-germline-nf`, so there's nothing to clone. You run it from **your own project folder**, in scratch where there is space; `work/` and `results/` are written there, never in the shared copy. Save the path in a variable to keep commands short:
 
 ```bash
-cd /jic/scratch/groups/<your-group>/<you>
-git clone https://git.nbi.ac.uk/workflows/parabricks-germline-nf.git
-cd parabricks-germline-nf
+PIPE=/jic/common/workflows/parabricks-germline-nf
+mkdir -p /jic/scratch/groups/<your-group>/<you>/my-project
+cd /jic/scratch/groups/<your-group>/<you>/my-project
 ```
+
+Add the `PIPE=...` line to your `~/.bashrc` so it's always set.
 
 **Work offline**
 
@@ -110,17 +112,17 @@ The launcher script (Section 8) sets this for you; you only need it when running
 
 Every step runs inside a Singularity container, so you don't install BWA, Parabricks or bcftools yourself. The [Singularity](singularity-basics.md) pill explains how containers work. The images are too big for git (Parabricks alone is several GB), so the repo holds small **definition files** (`containers/*.def`) instead.
 
-- **Using the shared copy:** the `jic` profile already points at pre-built `.sif` images, so there's nothing to do.
-- **Building your own:** building needs internet and root rights, both available on `software23`:
+- **Using the shared install:** the images are already built, in `$PIPE/containers/sif/`, and the `jic` profile uses them. There's nothing to do.
+- **Building your own** (e.g. for your own clone of the repo): building needs internet and root rights, both available on `software23`:
 
 ```bash
 ssh software23
-cd /jic/scratch/groups/<your-group>/<you>/parabricks-germline-nf
-containers/build.sh /jic/scratch/groups/<your-group>/sif
+cd /path/to/your/parabricks-germline-nf
+containers/build.sh                # builds into containers/sif/
 exit
 ```
 
-This builds the four images from the `.def` files (Parabricks is the slow one), tests each one and writes a `containers.yml`. Put them somewhere your group can share, then add `--container_dir /jic/scratch/groups/<your-group>/sif` to your runs. The pipeline then uses these local files and never needs internet.
+This builds the four images from the `.def` files (Parabricks is the slow one) and tests each one. If you put them somewhere else, add `--container_dir /that/folder` to your runs. The pipeline uses these local files and never needs internet.
 
 ## 6. Your samplesheet
 
@@ -146,7 +148,8 @@ S2,/path/S2_R1.fastq.gz,/path/S2_R2.fastq.gz,2
 interactive
 conda activate nf-env
 export NXF_OFFLINE=true
-nextflow run . -profile test,stub -stub
+cd /jic/scratch/groups/<your-group>/<you>/my-project
+nextflow run $PIPE -profile test,stub -stub
 ```
 
 Every process should finish with a ✔.
@@ -154,7 +157,7 @@ Every process should finish with a ✔.
 **Step 2: real GPU test on tiny data (a few minutes plus queue time)**
 
 ```bash
-NF_CONDA_ENV=nf-env sbatch scripts/submit_slurm.sh -profile jic,test \
+NF_CONDA_ENV=nf-env sbatch $PIPE/scripts/submit_slurm.sh -profile jic,test \
     --jic_gpu_scratch_gb 50 --min_scratch_gb 0 \
     --max_cpus 8 --max_memory '64 GB' --gpu_cpus 8 --gpu_memory '64 GB'
 ```
@@ -164,7 +167,7 @@ NF_CONDA_ENV=nf-env sbatch scripts/submit_slurm.sh -profile jic,test \
 When it finishes, check the merged VCF. `bcftools` isn't available on the command line by default. The simplest option is the pipeline's own bcftools container, the same version that wrote the file:
 
 ```bash
-BCFTOOLS="singularity exec /path/to/sif/bcftools-1.21.sif bcftools"   # your --container_dir
+BCFTOOLS="singularity exec $PIPE/containers/sif/bcftools-1.21.sif bcftools"
 $BCFTOOLS query -l results_test/merged/test.vcf.gz          # S1, S2, S3
 $BCFTOOLS view -H results_test/merged/test.vcf.gz | wc -l   # about 34 variant sites
 ```
@@ -179,14 +182,15 @@ catalogue --search bcftools     # or find it in the catalogue, then: source pack
 ## 8. A real run
 
 ```bash
-NF_CONDA_ENV=nf-env sbatch scripts/submit_slurm.sh -profile jic \
+cd /jic/scratch/groups/<your-group>/<you>/my-project
+NF_CONDA_ENV=nf-env sbatch $PIPE/scripts/submit_slurm.sh -profile jic \
     --samplesheet /path/to/samplesheet.csv \
     --ref /path/to/genome.fa \
     --prefix my_cohort \
     --outdir results
 ```
 
-`scripts/submit_slurm.sh` runs Nextflow itself as a small, long-running Slurm job, the **head job**. It activates your conda environment, sets the offline variables and always adds `-resume`. The head job then submits every real task as its own Slurm job.
+`submit_slurm.sh` runs Nextflow itself as a small, long-running Slurm job, the **head job**, in the folder you submit from. It activates your conda environment, sets the offline variables and always adds `-resume`. The head job then submits every real task as its own Slurm job.
 
 Useful options:
 
@@ -268,21 +272,22 @@ Sample columns in every merged VCF are sorted by `sample_id`.
 | `ssh software23` | The only node with internet: for conda installs and container builds |
 | `conda activate nf-env` | Make `nextflow` available |
 | `export NXF_OFFLINE=true` | Stop Nextflow trying to reach the internet |
-| `nextflow run . -profile test,stub -stub` | Dry run: check the setup in seconds |
-| `NF_CONDA_ENV=nf-env sbatch scripts/submit_slurm.sh -profile jic ...` | Launch a run on the cluster |
+| `PIPE=/jic/common/workflows/parabricks-germline-nf` | Path of the shared install |
+| `nextflow run $PIPE -profile test,stub -stub` | Dry run: check the setup in seconds |
+| `NF_CONDA_ENV=nf-env sbatch $PIPE/scripts/submit_slurm.sh -profile jic ...` | Launch a run (from your project folder) |
 | `tail -f nextflow_<jobid>.out` | Follow progress |
 | `cat work/<xx>/<hash>*/.command.err` | See why a task failed |
 | `containers/build.sh <dir>` | Build the container images yourself |
-| `singularity exec <sif_dir>/bcftools-1.21.sif bcftools query -l <vcf>` | List the samples in a VCF, using the pipeline's bcftools container |
+| `singularity exec $PIPE/containers/sif/bcftools-1.21.sif bcftools query -l <vcf>` | List the samples in a VCF, using the pipeline's bcftools container |
 
 ## Practice exercise
 
 Work through the following steps yourself to make sure everything sticks:
 
 - [ ] On `software23`, create the `nf-env` conda environment and check `nextflow -version`
-- [ ] Clone the repository into your scratch space
+- [ ] Create a project folder in your scratch space and set `PIPE` in your `~/.bashrc`
 - [ ] Run the dry run (`-profile test,stub -stub`) in an `interactive` session and get all ✔
-- [ ] Submit the tiny GPU test with `scripts/submit_slurm.sh` and follow it with `tail -f`
+- [ ] Submit the tiny GPU test with `$PIPE/scripts/submit_slurm.sh` and follow it with `tail -f`
 - [ ] List the samples and count the variants in `results_test/merged/test.vcf.gz`
 - [ ] Open `results_test/pipeline_info/report_*.html` and find which task used the most memory
 - [ ] Find the work directory of one `PBRUN_GERMLINE` task and read its `.command.sh`
