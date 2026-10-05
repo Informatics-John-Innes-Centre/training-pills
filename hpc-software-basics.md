@@ -1,4 +1,4 @@
-# Software Basics
+# HPC Software Basics
 
 ## Finding and loading software on the HPC
 

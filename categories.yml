@@ -19,11 +19,14 @@ HPC & Scientific Computing:
   - slurm-basics
   - conda-basics
   - singularity-basics
-  - software-basics
+  - hpc-software-basics
   - open-ondemand-basics
 
 Bioinformatics:
   - parabricks-nextflow
+
+Image Analysis & Machine Learning:
+  - training-image-models
 
 Version Control:
   - git-basics

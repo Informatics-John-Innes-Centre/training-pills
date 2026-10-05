@@ -173,7 +173,7 @@ $BCFTOOLS query -l results_test/merged/test.vcf.gz          # S1, S2, S3
 $BCFTOOLS view -H results_test/merged/test.vcf.gz | wc -l   # about 34 variant sites
 ```
 
-Or load it as a module or a Software Catalogue package; the [Software](software-basics.md) pill explains both:
+Or load it as a module or a Software Catalogue package; the [HPC Software](hpc-software-basics.md) pill explains both:
 
 ```bash
 ml av bcftools                  # list the module versions, then e.g. ml bcftools/<version>
