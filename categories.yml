@@ -22,10 +22,8 @@ HPC & Scientific Computing:
   - hpc-software-basics
   - open-ondemand-basics
 
-Bioinformatics:
+Workflows & Pipelines:
   - parabricks-nextflow
-
-Image Analysis & Machine Learning:
   - training-image-models
 
 Version Control:
