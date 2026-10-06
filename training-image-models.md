@@ -192,6 +192,8 @@ my_photos/
 
 If you've already split them yourself, use `train/<class>/`, `val/<class>/` and `test/<class>/` instead.
 
+> **Group related photos.** If your scores live in a spreadsheet rather than in folder names, or several photos show the same plant, write a small script that builds the class folders and keeps each plant (or line) in a single split. `examples/pea_aphanomyces/prepare.py` does exactly this and is a good starting point.
+
 > **Train, validation and test:** the model learns from **train**, the best epoch is chosen on **val**, and the final scores come from **test**, images the model never saw while training. Keep near-identical images (e.g. the same plot photographed twice) in the same split, or the scores will look better than they really are.
 
 Your data can stay where it is: set `data.path` in `params.yaml` to the folder, e.g. `/jic/scratch/groups/<your-group>/images/wheat_2026`. DVC records a fingerprint of it with every experiment, so you can tell when a model was trained on a different version.
@@ -262,7 +264,16 @@ sbatch submit.sh
 
 `submit.sh` runs Nextflow as a small, long-running **head job** on `jic-long`. It activates the conda environment, works offline and always adds `-resume`. The head job submits one GPU job per experiment to `jic-gpu`.
 
-Ready-made setups for two wheat datasets are in `examples/`, e.g. the YOLOv8-versus-YOLO11 comparison:
+Ready-made setups for real JIC datasets are in `examples/`. Each `params.yaml` explains itself in its first lines:
+
+| Example | Task | What it shows |
+|---|---|---|
+| `wheat_heads` | count | Wheat heads (GWHD 2021): YOLOv8 vs YOLO11, every size |
+| `flea_beetle` | count, 3 classes | Count per class (L1 / L2 / L3) on large TIFFs with outlined objects |
+| `wheat_disease` | classify | Wheat disease photos, one folder per class |
+| `pea_aphanomyces` | classify | Disease index 0-4 from a score spreadsheet; `prepare.py` builds the classes and splits **by line** so test lines are unseen |
+
+For example, the YOLOv8-versus-YOLO11 comparison:
 
 ```bash
 sbatch submit.sh --params_file examples/wheat_heads/params.yaml --sweep examples/wheat_heads/sweep.yaml
