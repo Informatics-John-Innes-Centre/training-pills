@@ -137,17 +137,18 @@ git push -u origin main
 
 Later, `git pull template main` brings in template updates (never while a sweep is running).
 
-**The training container.** Still on `software23`:
+**The training container.** All training runs in one Singularity image with PyTorch, Ultralytics YOLO and timm. **A shared copy is installed** at `/jic/common/workflows/ai/containers/vision-train.sif`, like the Parabricks pipeline's images, and the scripts use it automatically, so normally there's nothing to do.
+
+Only if you need your own image (or the shared one is missing), build it on `software23`:
 
 ```bash
-./containers/build.sh
+./containers/build.sh                  # builds containers/vision-train.sif, which then takes precedence
+./containers/install_shared.sh         # optional: make it the shared copy for everyone
 ```
 
-This builds `containers/vision-train.sif` (PyTorch, Ultralytics YOLO and timm). It takes 10–20 minutes and needs about 20 GB free in `/tmp`. It builds in `/tmp` because Singularity's `--fakeroot` builds can't read `/jic/scratch`: building in the project folder fails with *"Failed to restore current working directory: Permission denied"*.
+Building takes 10–20 minutes and needs about 20 GB free in `/tmp`. It builds in `/tmp` because Singularity's `--fakeroot` builds can't read `/jic/scratch`: building in the project folder fails with *"Failed to restore current working directory: Permission denied"*.
 
 > **Build it on `software23`, but don't run it there.** On `software23`, Singularity can't see your project folders (*"Not mounting current directory: user bind control is disabled"*). That's fine: training runs the container on the GPU nodes, and nothing else needs it on `software23`.
-
-> **Share the image.** It's several GB. Build it once per group, keep it somewhere shared, and point each project to it with `--train_container /path/to/vision-train.sif`.
 
 **Pretrained models.** Download the models you want to compare. Compute nodes are offline, so this has to happen here. It's plain Python, so the conda environment is all it needs:
 
@@ -343,6 +344,7 @@ The leaderboard for the latest sweep, best first, is in `nf-results/leaderboard.
 - `f1_macro`: the main score. It weighs every class equally, so a rare class the model gets wrong still pulls it down.
 - `accuracy`: the fraction of images classified correctly. It can look high when one class dominates.
 - `recall.<class>`: the fraction of each class found. Look here to see which class the model struggles with.
+- `ordinal_mae` and `within_one`: for **ordered classes** such as disease scores or growth stages. Set `classify.ordinal: true` and name the class folders with their number (`score_0`, `score_1`, …). `ordinal_mae` is the average number of steps a prediction is off, and `within_one` the fraction exact or one step off. Mixing up neighbouring scores is common, since people scoring by eye don't always agree either, so these often describe an ordinal model more fairly than `f1_macro`.
 
 **Plots:** training curves, predicted-versus-true counts and confusion matrices, side by side for any experiments:
 
@@ -445,7 +447,7 @@ Fix the cause and run `sbatch submit.sh` again. Thanks to `-resume`, finished tr
 | Command | What it does |
 | --- | --- |
 | `ssh software23` | The only node with internet: environment, container, pretrained models |
-| `./containers/build.sh` | Build the training container (on `software23`) |
+| `./containers/build.sh` | Build your own training container, if the shared one doesn't suit (on `software23`) |
 | `./scripts/fetch_weights.sh --for params.yaml sweep.yaml` | Download the pretrained weights your setup uses (on `software23`) |
 | `dvc add models/pretrained` | Version the pretrained weights |
 | `./scripts/check_data.sh` | Check your settings and images before training |
@@ -466,7 +468,7 @@ Fix the cause and run `sbatch submit.sh` again. Thanks to `-resume`, finished tr
 Work through the following steps yourself to make sure everything sticks:
 
 - [ ] Set your git name and email, clone the template on `software23`, make it your own project (`template` + `origin` remotes) and create the conda environment
-- [ ] Build the container with `./containers/build.sh`
+- [ ] Check the shared container exists: `ls /jic/common/workflows/ai/containers/`
 - [ ] Fetch the test's models with `--for tests/params.count.yaml tests/sweep.count.yaml`, and version them with `dvc add models/pretrained`
 - [ ] In an `interactive` session, run `bash submit.sh -profile jic,test` and watch the jobs go through
 - [ ] Run `dvc exp show` and find the two `smoketest` experiments and their `count_mae`
