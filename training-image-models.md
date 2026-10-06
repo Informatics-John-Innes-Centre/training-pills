@@ -49,8 +49,21 @@ Two kinds of task are supported:
 
 | Task | Question it answers | Model | Main score |
 | --- | --- | --- | --- |
-| `count` | "How many wheat heads / insects / spikelets are in this image?" | YOLO (Ultralytics), detects each object then counts them | `count_mae`: average miscount per image |
+| `count` | "How many wheat heads / fruits / insects are in this image?" | YOLO (Ultralytics), detects each object then counts them | `count_mae`: average miscount per image |
 | `classify` | "Which disease / growth stage / variety is this?" | Any of hundreds of pretrained networks from timm (ConvNeXt, EfficientNet, ViT, ResNet…) | `f1_macro`: balanced accuracy over all classes |
+
+**Which task fits your question?**
+
+- **One answer per image → `classify`.** The whole photo gets one label: a phenotype class or a score. Examples: leaf disease (healthy / yellow rust / septoria), a disease score from 0 to 5, growth stage, variety, stressed versus control. You need one folder of example images per class.
+- **Many things to find in an image → `count`.** Every object gets a box, and the boxes are counted. Examples: wheat heads in a plot, fruits on a plant, flowers, pods, spikelets, insects on a sticky trap, seedlings in a tray. You need images with a box drawn around every object (Section 5).
+
+**Not covered (yet):**
+
+- **Counts per class.** A counting model can learn several classes (e.g. `ripe` and `unripe` fruit), but the scores and predictions report the **total** per image, not one count per class.
+- **Several labels on one image.** Classification picks exactly one class per photo, so a leaf with both rust *and* mildew can't be labelled as both.
+- **Areas and percentages.** For example, "% of the leaf covered by lesions" needs segmentation (outlining pixels rather than drawing boxes), which is a different kind of model.
+
+If your project needs one of these, talk to Informatics before you start annotating: the right annotation depends on it.
 
 You list what you want to compare, and the pipeline does the rest:
 
