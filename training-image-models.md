@@ -127,12 +127,15 @@ conda activate vision-dvc
 
 > **Already have a Nextflow environment** (e.g. `nf-env` from the Parabricks pill)? Add DVC to it instead: `conda install -n nf-env -c conda-forge dvc pyyaml`, then put `export NF_CONDA_ENV=nf-env` in your `~/.bashrc` so the launcher uses it.
 
-**Make it your own project.** Your experiments will be pushed to git, so point the clone at a repository of your own (create an empty one on git.nbi.ac.uk first):
+**Make it your own project.** Your experiments are pushed to git, so each project needs a repository of its own. Create an empty one on git.nbi.ac.uk, then keep the template as a second remote, called `template`, so you can pick up its improvements later:
 
 ```bash
-git remote set-url origin https://git.nbi.ac.uk/<your-group>/my-project.git
+git remote rename origin template
+git remote add origin https://git.nbi.ac.uk/<your-group>/my-project.git
 git push -u origin main
 ```
+
+Later, `git pull template main` brings in template updates (never while a sweep is running).
 
 **The training container.** Still on `software23`:
 
@@ -149,13 +152,12 @@ This builds `containers/vision-train.sif` (PyTorch, Ultralytics YOLO and timm). 
 **Pretrained models.** Download the models you want to compare. Compute nodes are offline, so this has to happen here. It's plain Python, so the conda environment is all it needs:
 
 ```bash
-./scripts/fetch_weights.sh yolo11n yolov8n                    # the two small ones used by the test
-./scripts/fetch_weights.sh yolo11m yolov8m                    # counting
-./scripts/fetch_weights.sh convnext_tiny.fb_in22k_ft_in1k     # classification
-./scripts/fetch_weights.sh --for params.yaml sweep.yaml       # every model your setup uses
+./scripts/fetch_weights.sh --for tests/params.count.yaml tests/sweep.count.yaml   # the two small models the test uses
+./scripts/fetch_weights.sh --for params.yaml sweep.yaml                           # every model your own setup uses
+./scripts/fetch_weights.sh yolo11m convnext_tiny.fb_in22k_ft_in1k                 # or name them
 ```
 
-`--for` reads the model names from your `params.yaml` and `sweep.yaml` (or an example folder), so you never miss one. Models already downloaded are skipped.
+`--for` reads the model names from a `params.yaml` and `sweep.yaml`, so you never miss one. Models already downloaded are skipped.
 
 YOLO names run from `n` (nano, fastest) through `s`, `m`, `l` to `x` (largest, most accurate, slowest). For classification, any name from https://huggingface.co/timm works.
 
@@ -170,26 +172,28 @@ exit
 
 ## 5. Your images
 
-**For counting**, use the YOLO layout: one text file per image, one line per object, each line a class number and a box (centre x, centre y, width, height, all as fractions of the image size):
+**Lay them out for your task.**
+
+*For counting*, use the YOLO layout: one text file per image, one line per object, each line a class number and a box (centre x, centre y, width, height, all as fractions of the image size):
 
 ```text
-my_dataset/
+<your-images>/
 ├── images/
 │   ├── train/   IMG_001.jpg ...
 │   ├── val/     IMG_201.jpg ...
 │   └── test/    IMG_251.jpg ...     (optional, but recommended)
 └── labels/
     ├── train/   IMG_001.txt ...     0 0.412 0.533 0.051 0.078
-    ├── val/                          0 0.700 0.120 0.048 0.081
+    ├── val/                          1 0.700 0.120 0.048 0.081
     └── test/                         ...
 ```
 
-Annotation tools such as CVAT, Label Studio and Roboflow can all export in this "YOLO" format. Then set `count.classes` in `params.yaml` to the names of your classes, in the order of their class numbers: `[wheat_head]` for one class, or `[ripe, unripe]` when class `0` is ripe and `1` is unripe.
+Annotation tools such as CVAT, Label Studio and Roboflow export this "YOLO" format. Set `count.classes` in `params.yaml` to one name per class number, in order: `[head]` for one class, or `[ripe, unripe]` when `0` is ripe and `1` is unripe.
 
-**For classification**, use one folder per class. The pipeline splits them into training, validation and test images itself (70/15/15, the same way every time):
+*For classification*, use one folder per class. The pipeline splits them into training, validation and test images itself (70/15/15, the same way every time):
 
 ```text
-my_photos/
+<your-images>/
 ├── healthy/      *.jpg
 ├── yellow_rust/  *.jpg
 └── septoria/     *.jpg
@@ -197,11 +201,34 @@ my_photos/
 
 If you've already split them yourself, use `train/<class>/`, `val/<class>/` and `test/<class>/` instead.
 
-> **Group related photos.** If your scores live in a spreadsheet rather than in folder names, or several photos show the same plant, write a small script that builds the class folders and keeps each plant (or line) in a single split. `examples/pea_aphanomyces/prepare.py` does exactly this and is a good starting point.
+**Connect them to the project**, in one of two ways:
 
-> **Train, validation and test:** the model learns from **train**, the best epoch is chosen on **val**, and the final scores come from **test**, images the model never saw while training. Keep near-identical images (e.g. the same plot photographed twice) in the same split, or the scores will look better than they really are.
+- **Point to them.** Set `data.path` in `params.yaml` to the folder, wherever it is on the cluster. Nothing is copied. Every experiment records a fingerprint of the folder, so you can tell if it changed between experiments, but an older version can't be brought back if you edit the images.
+- **Version them in the project.** Each version is kept and can be restored, at the cost of the disk space of a copy:
 
-Your data can stay where it is: set `data.path` in `params.yaml` to the folder, e.g. `/jic/scratch/groups/<your-group>/images/wheat_2026`. DVC records a fingerprint of it with every experiment, so you can tell when a model was trained on a different version.
+  ```bash
+  mkdir -p data && cp -r /path/to/your/images data/my_images
+  dvc add data/my_images
+  git add data/my_images.dvc data/.gitignore && git commit -m "Images, version 1"
+  ```
+
+  and set `data.path: data/my_images`. After adding or relabelling images, `dvc add data/my_images` and commit again: that's a new version, and every experiment records which one it used.
+
+**Check them** (seconds, any node, conda environment active):
+
+```bash
+./scripts/check_data.sh
+```
+
+```text
+Data OK [count] /path/to/your/images: images train=<n>, val=<n>, test=<n>; objects <class 1>=<n>, <class 2>=<n>
+```
+
+It reports the images per split or class, and for counting the objects per class. It stops with a clear message on a wrong layout, a label using a class number that `count.classes` doesn't list, and similar mistakes, all before anything is queued.
+
+> **Train, validation and test:** the model learns from **train**, the best epoch (and, for counting, the confidence threshold) is chosen on **val**, and the final scores come from **test**, images the model never saw while training.
+
+> **Keep related photos in one split.** If several photos show the same plant (or line, plot…), a photo-by-photo split puts near-identical twins in both training and test, and the scores look better than they really are. When the group is part of the file name, `data.group_pattern` keeps each group together: `'^(plant\d+)_'` for `plant12_a.jpg`, `plant12_b.jpg`. For counting, or with your own train/val/test folders, put each group in a single split yourself.
 
 ## 6. Test before you scale up
 
@@ -269,33 +296,18 @@ sbatch submit.sh
 
 `submit.sh` runs Nextflow as a small, long-running **head job** on `jic-long`. It activates the conda environment, works offline and always adds `-resume`. The head job submits one GPU job per experiment to `jic-gpu`.
 
-Ready-made setups for real JIC datasets are in `examples/`. Each `params.yaml` explains itself in its first lines:
-
-| Example | Task | What it shows |
-|---|---|---|
-| `wheat_heads` | count | Wheat heads (GWHD 2021): YOLOv8 vs YOLO11, every size |
-| `flea_beetle` | count, 3 classes | Count per class (L1 / L2 / L3) on large TIFFs with outlined objects |
-| `wheat_disease` | classify | Wheat disease photos, one folder per class |
-| `pea_aphanomyces` | classify | Disease index 0-4 from a score spreadsheet; `prepare.py` builds the classes and splits **by line** so test lines are unseen |
-
-To run one, first fetch its models on `software23` (and, for `pea_aphanomyces`, build its dataset with the command at the top of its `params.yaml`):
+**Starting points.** `examples/count/` and `examples/classify/` each hold a `params.yaml` and a `sweep.yaml` with sensible settings and a model comparison. Copy the pair for your task to the project root and edit it:
 
 ```bash
-./scripts/fetch_weights.sh --for examples/wheat_heads
-dvc add models/pretrained && git add models/pretrained.dvc models/.gitignore && git commit -m "Weights for wheat_heads"
-```
-
-then launch it from a login node. For example, the YOLOv8-versus-YOLO11 comparison:
-
-```bash
-sbatch submit.sh --params_file examples/wheat_heads/params.yaml --sweep examples/wheat_heads/sweep.yaml
+cp examples/classify/params.yaml examples/classify/sweep.yaml .
+./scripts/check_data.sh
 ```
 
 Useful options:
 
 | Option | Use it when |
 | --- | --- |
-| `--exp_prefix wheat2026` | You want experiment names like `wheat2026-yolo11m` |
+| `--exp_prefix trial2026` | You want experiment names like `trial2026-yolo11m` |
 | `--slurm_gpu_type ''` | Jobs wait a long time for an A100: accept any GPU |
 | `--gpu_time 48h` | Large models or many epochs need longer than 24 h |
 | `--max_parallel 4` | You want fewer GPU jobs running at the same time (default 8) |
@@ -307,23 +319,14 @@ Useful options:
 dvc exp show
 ```
 
-The leaderboard for the latest sweep, best first, is in `nf-results/leaderboard.md`. Here it is for the `flea_beetle` example (3 classes, L1 to L3; 212 training and 27 test photos), with 4 YOLO11 sizes at 2 image sizes:
+The leaderboard for the latest sweep, best first, is in `nf-results/leaderboard.md`: one row per experiment, with its main scores and training time.
 
-```text
-| rank | experiment        | count_mae | count_rel_mae | count_bias | count_r2 | mAP50 | train_minutes |
-|------|-------------------|-----------|---------------|------------|----------|-------|---------------|
-| 1    | yolo11m-imgsz1536 | 1.778     | 3.76          | 1.778      | 0.994    | 0.988 | 15.0          |
-| 2    | yolo11s-imgsz1024 | 2.889     | 6.11          | 2.889      | 0.9869   | 0.976 | 9.1           |
-| 3    | yolo11s-imgsz1536 | 3.259     | 6.89          | 3.259      | 0.9875   | 0.983 | 11.0          |
-| ...  |                   |           |               |            |          |       |               |
-| 8    | yolo11x-imgsz1536 | 5.519     | 11.67         | 5.519      | 0.9673   | 0.944 | 27.4          |
-```
-
-> **Reading it like a scientist.** The best model miscounts by 1.8 objects per photo (3.8%), on photos holding 5 to 226 objects. Three things stand out:
+> **Reading it like a scientist.** Look beyond the top row:
 >
-> - **`count_bias` equals `count_mae` in every row.** That only happens when the model *over*-counts on every photo and never under-counts: a systematic offset, not random error. Raising the confidence threshold removes such borderline extra detections. The pipeline now does this for you (`count_conf`, below).
-> - **Bigger isn't better.** The `l` and `x` models do worse than `s` and `m`: with 212 training photos, large models overfit. They also take longer.
-> - **Small gaps aren't proof.** With 27 test photos, first and second place differ by about one object per photo. Treat close rankings as ties.
+> - **Is the error systematic?** If `count_bias` is about as large as `count_mae`, the model errs in the same direction on almost every image: it consistently over- (or under-) counts. That's an offset, not noise, and the confidence threshold (`count_conf`, below) is the usual fix.
+> - **Is bigger better?** Often not with a few hundred training images: large models can overfit and score worse than small ones, while costing more GPU time.
+> - **Are the gaps real?** With a few dozen test images, experiments a few percent apart are effectively tied. Prefer the simpler, faster model unless the better one is clearly better.
+> - **Which classes struggle?** The per-class scores show where errors come from: one rare class, or two similar classes confused with each other.
 
 **Counting scores:**
 
@@ -344,20 +347,18 @@ The leaderboard for the latest sweep, best first, is in `nf-results/leaderboard.
 **Plots:** training curves, predicted-versus-true counts and confusion matrices, side by side for any experiments:
 
 ```bash
-dvc plots diff yolo11l yolov8m --open
+dvc plots diff <experiment 1> <experiment 2> --open
 ```
 
 The [DVC extension for VS Code](https://marketplace.visualstudio.com/items?itemName=Iterative.dvc) shows the same table and plots interactively.
-
-> **Big differences only:** with a small test set, two experiments a few percent apart may not really differ. Prefer the simpler, faster model unless the better one is clearly better.
 
 ## 9. Keep the best and share it
 
 ```bash
 git status                       # start from a clean folder (commit or `git stash` first)
-dvc exp apply yolo11m-imgsz1536  # its settings, metrics and model, into your folder
+dvc exp apply <experiment>       # its settings, metrics and model, into your folder
 git add -A
-git commit -m "Adopt yolo11m-imgsz1536 (count_mae 1.78)"
+git commit -m "Adopt <experiment>"
 git push                         # the record: settings, code, metrics, fingerprints
 ```
 
@@ -370,30 +371,29 @@ Your project's `main` branch now holds that experiment: its exact settings, code
 **1. Copy the model out of DVC** (with the conda environment active):
 
 ```bash
-./scripts/export_model.sh yolo11m-imgsz1536
+./scripts/export_model.sh <experiment>
 ```
 
-This creates `models/trained/yolo11m-imgsz1536/` holding the weights, the experiment's test scores and its settings. Your folder and code stay as they are. If a rerun sweep left several experiments with the same name, the newest is used and the older ones are listed, with the full name to pass if you want one of those.
+This creates `models/trained/<experiment>/` holding the weights, the experiment's test scores and its settings. Your folder and code stay as they are. If a rerun sweep left several experiments with the same name, the newest is used and the older ones are listed, with the full name to pass if you want one of those.
 
 > **Why not `dvc exp apply`?** `apply` brings back *everything* the experiment was made with, including the code in `src/` as it was then. That's what you want for reproducing it, not for analysis with today's tools.
 
 **2. Run it on your images as a GPU job** (from a login node):
 
 ```bash
-sbatch scripts/predict.sh models/trained/yolo11m-imgsz1536 /path/to/field/images analysis/field_2026.csv --save-images
+sbatch scripts/predict.sh models/trained/<experiment> /path/to/new/images analysis/<name>.csv --save-images
 ```
 
 The image folder may contain subfolders (one per date, plot or flight). Each CSV row keeps the image's path, so it can be joined to your plot metadata in R, Python or Excel:
 
 ```text
-image,count,L1,L3,L2
-2026-06-01/plot_A/IMG_0012.tif,48,48,0,0
-2026-06-01/plot_B/IMG_0013.tif,31,0,0,31
+image,count,<class 1>,<class 2>,...
+<date>/<plot>/<image>,<total>,<n class 1>,<n class 2>,...
 ```
 
-For a counting model you get the total and one column per class; for a classification model, the predicted class, its `confidence` and a probability for every class. `--save-images` also writes copies of the images with the boxes drawn, in `analysis/field_2026_images/`.
+For a counting model you get the total and one column per class; for a classification model, the predicted class, its `confidence` and a probability for every class. `--save-images` also writes copies of the images with the boxes drawn, in `analysis/<name>_images/`.
 
-**3. Keep the `.json` next to the CSV.** `analysis/field_2026.json` records what produced the numbers: the experiment and its commit, the model's settings (including the counting threshold), its test scores and a fingerprint of the weights. Cite the experiment name and commit in your methods.
+**3. Keep the `.json` next to the CSV.** `analysis/<name>.json` records what produced the numbers: the experiment and its commit, the model's settings (including the counting threshold), its test scores and a fingerprint of the weights. Cite the experiment name and commit in your methods.
 
 > **Before trusting thousands of numbers:**
 > - **Look at the boxes** (`--save-images`) on a few dozen images first.
@@ -446,8 +446,9 @@ Fix the cause and run `sbatch submit.sh` again. Thanks to `-resume`, finished tr
 | --- | --- |
 | `ssh software23` | The only node with internet: environment, container, pretrained models |
 | `./containers/build.sh` | Build the training container (on `software23`) |
-| `./scripts/fetch_weights.sh yolo11m` | Download pretrained weights (on `software23`) |
+| `./scripts/fetch_weights.sh --for params.yaml sweep.yaml` | Download the pretrained weights your setup uses (on `software23`) |
 | `dvc add models/pretrained` | Version the pretrained weights |
+| `./scripts/check_data.sh` | Check your settings and images before training |
 | `bash submit.sh -profile jic,test` | Five-minute check of the whole setup, watched live (inside `interactive`) |
 | `sbatch submit.sh` | Run every experiment in `sweep.yaml` |
 | `tail -f logs/vision-train-<jobid>.out` | Follow progress |
@@ -458,17 +459,19 @@ Fix the cause and run `sbatch submit.sh` again. Thanks to `-resume`, finished tr
 | `dvc exp remove <name>` | Delete an experiment |
 | `./scripts/export_model.sh <name>` | Copy an experiment's model out, ready for analysis |
 | `sbatch scripts/predict.sh <model> <images> <out.csv>` | Count or classify a folder of images on a GPU |
+| `git pull template main` | Bring in template updates (not during a sweep) |
 
 ## Practice exercise
 
 Work through the following steps yourself to make sure everything sticks:
 
-- [ ] Set your git name and email, then clone the template on `software23` and create the conda environment
+- [ ] Set your git name and email, clone the template on `software23`, make it your own project (`template` + `origin` remotes) and create the conda environment
 - [ ] Build the container with `./containers/build.sh`
-- [ ] Fetch `yolo11n` and `yolov8n`, and version them with `dvc add models/pretrained`
+- [ ] Fetch the test's models with `--for tests/params.count.yaml tests/sweep.count.yaml`, and version them with `dvc add models/pretrained`
 - [ ] In an `interactive` session, run `bash submit.sh -profile jic,test` and watch the jobs go through
 - [ ] Run `dvc exp show` and find the two `smoketest` experiments and their `count_mae`
 - [ ] Run `dvc exp apply smoketest-yolo11n` and look at `results/metrics.json` and `results/plots/counts.csv`
 - [ ] Export `smoketest-yolo11n` with `./scripts/export_model.sh`, run `scripts/predict.sh` on `tests/data/count_tiny/images/test` with `--save-images`, and look at the boxes and the `.json`
 - [ ] Restore your folder with `git checkout -- .` and remove the smoke-test experiments
-- [ ] Lay out a small set of your own images, set `data.path`, and sweep two models
+- [ ] Lay out a small set of your own images, copy the `examples/` starting point for your task, set `data.path`, and run `./scripts/check_data.sh` until it reports OK
+- [ ] Fetch the models with `--for`, sweep two of them, and read the leaderboard with the questions from Section 8
