@@ -150,7 +150,10 @@ This builds `containers/vision-train.sif` (PyTorch, Ultralytics YOLO and timm). 
 ./scripts/fetch_weights.sh yolo11n yolov8n                    # the two small ones used by the test
 ./scripts/fetch_weights.sh yolo11m yolov8m                    # counting
 ./scripts/fetch_weights.sh convnext_tiny.fb_in22k_ft_in1k     # classification
+./scripts/fetch_weights.sh --for params.yaml sweep.yaml       # every model your setup uses
 ```
+
+`--for` reads the model names from your `params.yaml` and `sweep.yaml` (or an example folder), so you never miss one. Models already downloaded are skipped.
 
 YOLO names run from `n` (nano, fastest) through `s`, `m`, `l` to `x` (largest, most accurate, slowest). For classification, any name from https://huggingface.co/timm works.
 
@@ -273,7 +276,14 @@ Ready-made setups for real JIC datasets are in `examples/`. Each `params.yaml` e
 | `wheat_disease` | classify | Wheat disease photos, one folder per class |
 | `pea_aphanomyces` | classify | Disease index 0-4 from a score spreadsheet; `prepare.py` builds the classes and splits **by line** so test lines are unseen |
 
-For example, the YOLOv8-versus-YOLO11 comparison:
+To run one, first fetch its models on `software23` (and, for `pea_aphanomyces`, build its dataset with the command at the top of its `params.yaml`):
+
+```bash
+./scripts/fetch_weights.sh --for examples/wheat_heads
+dvc add models/pretrained && git add models/pretrained.dvc models/.gitignore && git commit -m "Weights for wheat_heads"
+```
+
+then launch it from a login node. For example, the YOLOv8-versus-YOLO11 comparison:
 
 ```bash
 sbatch submit.sh --params_file examples/wheat_heads/params.yaml --sweep examples/wheat_heads/sweep.yaml
