@@ -94,8 +94,10 @@ And four commands:
 dvc exp show              # table of all experiments: settings + metrics
 dvc exp apply yolo11m     # bring one experiment's settings, metrics and model into your folder
 dvc add <folder>          # version a folder of large files (data, weights)
-dvc push / dvc pull       # copy large files to / from shared storage
+dvc plots diff a b --open # compare two experiments' charts
 ```
+
+> **A DVC remote is optional.** Just as git can push to a remote (GitLab), DVC can push the large files to shared storage (`dvc push` / `dvc pull`) so others can download your models and data. Here we use DVC only for **version control**: everything stays in your project's DVC cache (`.dvc/cache`), which is enough to record, compare and reproduce every experiment. A remote can be added later without changing anything else.
 
 > **Nextflow in one line:** it turns a list of experiments into Slurm jobs, runs them in a fixed container and remembers which finished, so a failed run picks up where it stopped (`-resume`). The [Parabricks](parabricks-nextflow.md) pill covers it in more depth.
 
@@ -353,13 +355,13 @@ The [DVC extension for VS Code](https://marketplace.visualstudio.com/items?itemN
 
 ```bash
 git status                       # start from a clean folder (commit or `git stash` first)
-dvc exp apply yolo11l            # its settings, metrics and model, into your folder
+dvc exp apply yolo11m-imgsz1536  # its settings, metrics and model, into your folder
 git add -A
-git commit -m "Adopt yolo11l (count_mae 2.1)"
-git push
+git commit -m "Adopt yolo11m-imgsz1536 (count_mae 1.78)"
+git push                         # the record: settings, code, metrics, fingerprints
 ```
 
-Your project's `main` branch now holds that experiment. Anyone who clones it gets the exact settings, code and metrics, and with `dvc pull` the trained model too, once a DVC remote (shared storage for the large files) has been set up: ask Informatics.
+Your project's `main` branch now holds that experiment: its exact settings, code and metrics, and fingerprints of its data, weights and model. The trained model itself is in the project's DVC cache on the cluster, so anyone working in the project folder can use it. A fresh clone elsewhere gets the record but not the large files, until a DVC remote is set up (see the note in Section 3).
 
 ## 10. Use a trained model
 
