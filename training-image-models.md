@@ -373,7 +373,7 @@ Your project's `main` branch now holds that experiment: its exact settings, code
 ./scripts/export_model.sh yolo11m-imgsz1536
 ```
 
-This creates `models/trained/yolo11m-imgsz1536/` holding the weights, the experiment's test scores and its settings. Your folder and code stay as they are.
+This creates `models/trained/yolo11m-imgsz1536/` holding the weights, the experiment's test scores and its settings. Your folder and code stay as they are. If a rerun sweep left several experiments with the same name, the newest is used and the older ones are listed, with the full name to pass if you want one of those.
 
 > **Why not `dvc exp apply`?** `apply` brings back *everything* the experiment was made with, including the code in `src/` as it was then. That's what you want for reproducing it, not for analysis with today's tools.
 
