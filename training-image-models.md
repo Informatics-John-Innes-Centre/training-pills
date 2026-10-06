@@ -305,17 +305,23 @@ Useful options:
 dvc exp show
 ```
 
+The leaderboard for the latest sweep, best first, is in `nf-results/leaderboard.md`. Here it is for the `flea_beetle` example (3 classes, L1 to L3; 212 training and 27 test photos), with 4 YOLO11 sizes at 2 image sizes:
+
 ```text
- Experiment        count_mae  count_rel_mae  count_bias  mAP50   train.model  train.imgsz
- main              -          -              -           -       yolo11m      1024
- ├── yolo11l       2.1        4.3            -0.4        0.93    yolo11l      1024
- ├── yolo11m       2.4        4.9            -0.9        0.92    yolo11m      1024
- └── yolov8m       2.9        5.9            -1.6        0.91    yolov8m      1024
+| rank | experiment        | count_mae | count_rel_mae | count_bias | count_r2 | mAP50 | train_minutes |
+|------|-------------------|-----------|---------------|------------|----------|-------|---------------|
+| 1    | yolo11m-imgsz1536 | 1.778     | 3.76          | 1.778      | 0.994    | 0.988 | 15.0          |
+| 2    | yolo11s-imgsz1024 | 2.889     | 6.11          | 2.889      | 0.9869   | 0.976 | 9.1           |
+| 3    | yolo11s-imgsz1536 | 3.259     | 6.89          | 3.259      | 0.9875   | 0.983 | 11.0          |
+| ...  |                   |           |               |            |          |       |               |
+| 8    | yolo11x-imgsz1536 | 5.519     | 11.67         | 5.519      | 0.9673   | 0.944 | 27.4          |
 ```
 
-*(illustrative numbers)*
-
-The leaderboard for the latest sweep, best first, is in `nf-results/leaderboard.md`.
+> **Reading it like a scientist.** The best model miscounts by 1.8 objects per photo (3.8%), on photos holding 5 to 226 objects. Three things stand out:
+>
+> - **`count_bias` equals `count_mae` in every row.** That only happens when the model *over*-counts on every photo and never under-counts: a systematic offset, not random error. Raising the confidence threshold removes such borderline extra detections. The pipeline now does this for you (`count_conf`, below).
+> - **Bigger isn't better.** The `l` and `x` models do worse than `s` and `m`: with 212 training photos, large models overfit. They also take longer.
+> - **Small gaps aren't proof.** With 27 test photos, first and second place differ by about one object per photo. Treat close rankings as ties.
 
 **Counting scores:**
 
@@ -325,6 +331,7 @@ The leaderboard for the latest sweep, best first, is in `nf-results/leaderboard.
 - `count_r2`: how well predicted counts follow the true counts (1 = perfectly).
 - `mAP50`, `precision`, `recall`: how good the boxes themselves are.
 - `per_class.<name>.count_mae` (and `count_bias`, `mAP50`…): the same scores for each class, when you have more than one. A model can count the total well while confusing ripe and unripe; these columns show it.
+- `count_conf`: the confidence threshold used for counting. A box counts only if the model is at least this sure. Several thresholds are tried (`count.conf_scan` in `params.yaml`), and the one that counts best on the **validation** photos is used. The scores above are then measured on the **test** photos, which played no part in the choice, so they stay honest. `predict.py` uses the chosen threshold automatically.
 
 **Classification scores:**
 
