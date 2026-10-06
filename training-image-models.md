@@ -56,10 +56,10 @@ Two kinds of task are supported:
 
 - **One answer per image → `classify`.** The whole photo gets one label: a phenotype class or a score. Examples: leaf disease (healthy / yellow rust / septoria), a disease score from 0 to 5, growth stage, variety, stressed versus control. You need one folder of example images per class.
 - **Many things to find in an image → `count`.** Every object gets a box, and the boxes are counted. Examples: wheat heads in a plot, fruits on a plant, flowers, pods, spikelets, insects on a sticky trap, seedlings in a tray. You need images with a box drawn around every object (Section 5).
+- **How many of each kind → `count` with several classes.** Give each box a class, e.g. `ripe` / `unripe` fruit, heads by growth stage, or insects by species. You get the total **and** a count per class for every image, each with its own scores.
 
 **Not covered (yet):**
 
-- **Counts per class.** A counting model can learn several classes (e.g. `ripe` and `unripe` fruit), but the scores and predictions report the **total** per image, not one count per class.
 - **Several labels on one image.** Classification picks exactly one class per photo, so a leaf with both rust *and* mildew can't be labelled as both.
 - **Areas and percentages.** For example, "% of the leaf covered by lesions" needs segmentation (outlining pixels rather than drawing boxes), which is a different kind of model.
 
@@ -179,7 +179,7 @@ my_dataset/
     └── test/                         ...
 ```
 
-Annotation tools such as CVAT, Label Studio and Roboflow can all export in this "YOLO" format. Then set `count.classes` in `params.yaml` to the names of your classes, e.g. `[wheat_head]`.
+Annotation tools such as CVAT, Label Studio and Roboflow can all export in this "YOLO" format. Then set `count.classes` in `params.yaml` to the names of your classes, in the order of their class numbers: `[wheat_head]` for one class, or `[ripe, unripe]` when class `0` is ripe and `1` is unripe.
 
 **For classification**, use one folder per class. The pipeline splits them into training, validation and test images itself (70/15/15, the same way every time):
 
@@ -303,6 +303,7 @@ The leaderboard for the latest sweep, best first, is in `nf-results/leaderboard.
 - `count_bias`: negative means the model **under-counts** on average, positive means it over-counts. Under-counting usually means objects are touching or overlapping.
 - `count_r2`: how well predicted counts follow the true counts (1 = perfectly).
 - `mAP50`, `precision`, `recall`: how good the boxes themselves are.
+- `per_class.<name>.count_mae` (and `count_bias`, `mAP50`…): the same scores for each class, when you have more than one. A model can count the total well while confusing ripe and unripe; these columns show it.
 
 **Classification scores:**
 
@@ -342,7 +343,12 @@ srun --partition=jic-gpu --gres=gpu:1 --mem=16G --pty \
     python src/predict.py --images /path/to/new/images --out counts.csv --save-images
 ```
 
-This writes one row per image: the count (and, with `--save-images`, copies of the images with the boxes drawn), or the predicted class with its probabilities. Use `--conf` to try a different confidence threshold without retraining.
+This writes one row per image: the count, plus one column per class when there are several (and, with `--save-images`, copies of the images with the boxes drawn), or the predicted class with its probabilities:
+
+```text
+image,count,ripe,unripe
+plant_001.jpg,23,9,14
+``` Use `--conf` to try a different confidence threshold without retraining.
 
 ## 11. When something fails
 
