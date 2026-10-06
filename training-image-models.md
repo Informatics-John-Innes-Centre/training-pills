@@ -361,24 +361,44 @@ git commit -m "Adopt yolo11m-imgsz1536 (count_mae 1.78)"
 git push                         # the record: settings, code, metrics, fingerprints
 ```
 
+Adopt an experiment soon after its sweep: `dvc exp apply` also restores the code in `src/` as it was when the experiment ran, so applying an old one after the code has been updated would roll the code back. To *use* a model later, export it instead (Section 10).
+
 Your project's `main` branch now holds that experiment: its exact settings, code and metrics, and fingerprints of its data, weights and model. The trained model itself is in the project's DVC cache on the cluster, so anyone working in the project folder can use it. A fresh clone elsewhere gets the record but not the large files, until a DVC remote is set up (see the note in Section 3).
 
-## 10. Use a trained model
+## 10. Use the best model for your analysis
 
-After `dvc exp apply`, the model is in `results/model/`. Run it on new images:
+**1. Copy the model out of DVC** (with the conda environment active):
 
 ```bash
-srun --partition=jic-gpu --gres=gpu:1 --mem=16G --pty \
-    singularity exec --nv containers/vision-train.sif \
-    python src/predict.py --images /path/to/new/images --out counts.csv --save-images
+./scripts/export_model.sh yolo11m-imgsz1536
 ```
 
-This writes one row per image: the count, plus one column per class when there are several (and, with `--save-images`, copies of the images with the boxes drawn), or the predicted class with its probabilities:
+This creates `models/trained/yolo11m-imgsz1536/` holding the weights, the experiment's test scores and its settings. Your folder and code stay as they are.
+
+> **Why not `dvc exp apply`?** `apply` brings back *everything* the experiment was made with, including the code in `src/` as it was then. That's what you want for reproducing it, not for analysis with today's tools.
+
+**2. Run it on your images as a GPU job** (from a login node):
+
+```bash
+sbatch scripts/predict.sh models/trained/yolo11m-imgsz1536 /path/to/field/images analysis/field_2026.csv --save-images
+```
+
+The image folder may contain subfolders (one per date, plot or flight). Each CSV row keeps the image's path, so it can be joined to your plot metadata in R, Python or Excel:
 
 ```text
-image,count,ripe,unripe
-plant_001.jpg,23,9,14
-``` Use `--conf` to try a different confidence threshold without retraining.
+image,count,L1,L3,L2
+2026-06-01/plot_A/IMG_0012.tif,48,48,0,0
+2026-06-01/plot_B/IMG_0013.tif,31,0,0,31
+```
+
+For a counting model you get the total and one column per class; for a classification model, the predicted class, its `confidence` and a probability for every class. `--save-images` also writes copies of the images with the boxes drawn, in `analysis/field_2026_images/`.
+
+**3. Keep the `.json` next to the CSV.** `analysis/field_2026.json` records what produced the numbers: the experiment and its commit, the model's settings (including the counting threshold), its test scores and a fingerprint of the weights. Cite the experiment name and commit in your methods.
+
+> **Before trusting thousands of numbers:**
+> - **Look at the boxes** (`--save-images`) on a few dozen images first.
+> - **Stay in your training domain.** A model trained on one camera, growth stage or site can do worse on another. Label a small sample of the new images and compare.
+> - **Flag doubtful classifications** with a low `confidence` (e.g. below 0.6) for a manual look.
 
 ## 11. When something fails
 
@@ -436,7 +456,8 @@ Fix the cause and run `sbatch submit.sh` again. Thanks to `-resume`, finished tr
 | `dvc plots diff <exp1> <exp2> --open` | Compare training curves and results |
 | `dvc exp apply <name>` | Bring an experiment into your folder |
 | `dvc exp remove <name>` | Delete an experiment |
-| `python src/predict.py --images <dir>` | Use the trained model (inside the container) |
+| `./scripts/export_model.sh <name>` | Copy an experiment's model out, ready for analysis |
+| `sbatch scripts/predict.sh <model> <images> <out.csv>` | Count or classify a folder of images on a GPU |
 
 ## Practice exercise
 
@@ -448,6 +469,6 @@ Work through the following steps yourself to make sure everything sticks:
 - [ ] In an `interactive` session, run `bash submit.sh -profile jic,test` and watch the jobs go through
 - [ ] Run `dvc exp show` and find the two `smoketest` experiments and their `count_mae`
 - [ ] Run `dvc exp apply smoketest-yolo11n` and look at `results/metrics.json` and `results/plots/counts.csv`
-- [ ] Run `predict.py` on `tests/data/count_tiny/images/test` with `--save-images` and look at the boxes
+- [ ] Export `smoketest-yolo11n` with `./scripts/export_model.sh`, run `scripts/predict.sh` on `tests/data/count_tiny/images/test` with `--save-images`, and look at the boxes and the `.json`
 - [ ] Restore your folder with `git checkout -- .` and remove the smoke-test experiments
 - [ ] Lay out a small set of your own images, set `data.path`, and sweep two models
