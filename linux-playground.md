@@ -206,7 +206,7 @@ bwa mem ref.fa reads_R1.fastq.gz 2>&1 | tail -20 | biowizard what does this erro
 
 `2>&1` includes the error messages, and `tail -20` keeps just the end, where errors usually are.
 
-**Let it see your screen.** Run `biowizard on` once. From then on, what appears in your terminal is copied to a private file (only you can read it, it's deleted when you log out), and `biowizard` reads the last 40 lines when you ask. Your window restarts, in the same folder, with recording on (anything you'd set with `export` is cleared). It stays on for future logins until you run `biowizard off`; `biowizard status` tells you whether it's on, and so does the login banner. Scrolling back in PuTTY works as usual.
+**Let it see your screen.** Run `biowizard on` once. From then on, what appears in your terminal is copied to a private file (only you can read it, it's deleted when you log out), and `biowizard` reads the last 40 lines when you ask. Your window restarts, in the same folder, with recording on (anything you'd set with `export` is cleared). It stays on for future logins until you run `biowizard off`; `biowizard status` tells you whether it's on, and the login banner shows it in red when it's on. Scrolling back in PuTTY works as usual.
 
 Good to know:
 
@@ -214,6 +214,7 @@ Good to know:
 - **It can be wrong.** Treat its answer as a hint, and ask the trainer if it doesn't make sense or doesn't work.
 - **Up to 30 questions an hour** each. The first question after a quiet spell can take up to half a minute while the model loads; after that, answers take a few seconds.
 - **Your questions are kept**, with the context sent (including the screen lines, if you turned that on), so trainers can see where people get stuck. Don't ask about, paste or pipe in anything confidential.
+- **Questions or problems with `biowizard` itself?** Email informatics@nbi.ac.uk.
 - Quote or avoid `?`, `*` and `!` if your question gets mangled: the shell treats them specially. `biowizard 'why?'` is always safe.
 
 ## 9. Being a good neighbour
