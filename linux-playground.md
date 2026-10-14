@@ -65,7 +65,7 @@ You'll see it again on a new computer, and that's fine. But if PuTTY ever says t
 
 **Nothing appears while you type your password.** No dots, no stars. That's normal: type it and press Enter.
 
-You'll then see a welcome banner, ending with a tip about `biowizard` (Section 8), and a prompt like this:
+You'll then see a welcome banner, ending with a few lines about `biowizard` (Section 8): how to ask, whether it can see your screen, and who to contact. Then a prompt like this:
 
 ```text
 [username@v1373 ~]$
@@ -175,12 +175,21 @@ When the trainer highlights text with the mouse, you'll see it highlighted too: 
 
 ## 8. Getting help: biowizard
 
-Stuck on an error, or not sure what to type next? Ask `biowizard`, a model hosted at the NBI that knows this machine and its tools. Type your question straight after it, in plain English:
+Stuck on an error, or not sure what to type next? Ask `biowizard`, a model hosted at the NBI. Type your question straight after it, in plain English. You can ask about:
+
+- **Errors**: why did that fail, what does this message mean.
+- **Linux**: how to find, count, copy or compress files, write a small script, and so on.
+- **Bioinformatics**: tools such as `bwa` and `samtools`, file formats (FASTQ, SAM/BAM, VCF), and the ideas behind them (what a SNP, coverage or mapping quality is).
+- **This machine**: your U drive and `mountu`, where to save your work, getting the course data, following the trainer's screen.
 
 ```bash
 biowizard why did my last command fail?
 biowizard how do I count the reads in a fastq.gz file?
+biowizard what is mapping quality?
+biowizard where should I save my work?
 ```
+
+Answers are short: what happened, then the command to try. It politely declines anything outside these topics. `biowizard help` shows how to use it.
 
 ```text
 $ bwa mem ref.fa reads_R1.fastq.gz > out.sam
@@ -235,6 +244,7 @@ Good to know:
 | `ls ~/u_drive` is empty but `U:\informatics` isn't | The link was lost when the machine restarted; run `mountu` again |
 | `command not found` | Check the spelling. If the tool isn't in Section 6, it isn't installed |
 | `biowizard: couldn't reach the model` | The model server is down or busy; ask the trainer instead |
+| `biowizard: the network blocked this question` | The network filter mistook it for a download command; ask in other words, or pipe in less output |
 | `biowizard` asks you to paste, though you ran `biowizard on` | This window was opened before recording was turned on; log out and back in |
 | `No space left on device` | Your home folder or `/tmp` is full; delete what you don't need, or work in `~/u_drive` |
 
@@ -252,6 +262,7 @@ Good to know:
 | `command -v <tool>` | Is this tool installed, and where |
 | `atraining` | Watch the trainer's screen (`Ctrl-b` then `d` to leave) |
 | `biowizard <question>` | Ask for help; pipe a command's output in with `2>&1 \| biowizard ...` |
+| `biowizard help` | How to use `biowizard` |
 | `biowizard on` / `off` / `status` | Let `biowizard` see your screen, or stop it |
 | `top` | See what's running (`q` to quit) |
 
