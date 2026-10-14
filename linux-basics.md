@@ -25,6 +25,8 @@ The main idea to take away:
 
 On an HPC, there usually isn't a graphical desktop — you connect over SSH straight into a terminal, and everything (moving files, running tools, submitting jobs) happens through typed commands. This isn't a stripped-down version of "real" computing — it's the normal way bioinformatics work happens, and every other pill in this series (`tmux`, `rsync`, `find`, `slurm`, ...) assumes you're comfortable here first.
 
+> **Where to practise:** every command in this pill works on **linux-playground**, our shared training machine. The [Linux Playground](linux-playground.md) pill shows how to log in.
+
 ## 2. Where am I? Navigating the filesystem
 
 **Print your current location**
@@ -292,7 +294,7 @@ rsync --help
 
 ## Practice exercise
 
-Work through the following steps yourself to make sure everything sticks:
+Work through the following steps yourself to make sure everything sticks, on [linux-playground](linux-playground.md) or any Linux machine:
 
 - [ ] Check your current directory with `pwd`
 - [ ] Create a nested directory structure in one command with `mkdir -p`

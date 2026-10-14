@@ -3,7 +3,7 @@
 Source content for JIC Informatics' Training Pills — short, self-contained
 training materials, rendered at `informatics.jic.ac.uk/training-pills/` by
 the [`flask-training-pills`](https://git.nbi.ac.uk/informatics-web-services/flask-training-pills)
-app. This repo holds only the `.md` files (and `categories.yml`); the app
+app. This repo holds only the `.md` files, their `images/`, and `categories.yml`; the app
 itself lives separately and just reads whatever's here.
 
 ## Adding a pill
@@ -18,6 +18,20 @@ itself lives separately and just reads whatever's here.
    under the catch-all "Other" heading.
 4. Push to `main`. The app's sync timer picks up new/changed pills within
    15 minutes (or ask whoever runs it to trigger a sync sooner).
+
+## Images and screenshots
+
+Put a pill's images in `images/<pill-slug>/` and link them relatively:
+
+```markdown
+![PuTTY with linux-playground as the host name](images/linux-playground/putty-config.png)
+```
+
+The app serves them at `/training-pills/images/...` (PNG, JPEG, GIF, WebP and
+SVG only), and the same link works when the `.md` is viewed on GitLab.
+Always write the alt text as a description of what the image shows, for
+anyone who can't see it. Crop screenshots to the part that matters and keep
+them under ~300 KB.
 
 ## `categories.yml`
 

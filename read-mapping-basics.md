@@ -36,10 +36,10 @@ Each sample is **paired-end** Illumina MiSeq data, with reads of 301 bases: `_R1
 
 ## 2. Log in and set up your folder
 
-Connect to **linux-playground** with PuTTY (Windows) or a terminal (Mac, Linux, [WSL](wsl-basics.md)):
+Connect to **linux-playground** with PuTTY (Windows) or a terminal (Mac, Linux, [WSL](wsl-basics.md)). First time? The [Linux Playground](linux-playground.md) pill walks through logging in and linking your U drive.
 
 ```bash
-ssh <your-username>@linux-playground
+ssh <your-username>@linux-playground.nbi.ac.uk
 ```
 
 > **In a class?** Open a second PuTTY window or terminal, log in again and type `atraining`. That window then shows the trainer's screen, read-only, so you can follow along in one window and type in the other. Press `Ctrl-b` then `d` to leave it.
