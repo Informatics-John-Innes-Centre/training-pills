@@ -40,7 +40,13 @@ linux-playground (`linux-playground.nbi.ac.uk`) is a small Linux server run by J
 
 You need your **NBI username and password**, the same ones you use to log in to your PC. You connect from the institute network; off site, connect to the VPN first.
 
-**Windows: PuTTY.** Open PuTTY, type `linux-playground.nbi.ac.uk` in **Host Name**, leave the port at 22, and click **Open**. Log in with your username, then your password.
+**Windows: PuTTY.** Open PuTTY, type `linux-playground.nbi.ac.uk` in **Host Name**, leave the port at 22 and the connection type at **SSH**, and click **Open**.
+
+![PuTTY Configuration window, with linux-playground.nbi.ac.uk in the Host Name box, port 22 and SSH selected](images/linux-playground/putty-config.png)
+
+A black terminal window opens and asks for your username at `login as:`. Type it and press Enter, then type your password at the next prompt.
+
+![PuTTY terminal window showing the "login as:" prompt](images/linux-playground/putty-login-prompt.png)
 
 **Windows, Mac, Linux or [WSL](wsl-basics.md): a terminal.** Windows 10 and 11 include `ssh` in PowerShell and Windows Terminal; on a Mac use the Terminal app.
 
@@ -50,8 +56,13 @@ ssh <your-username>@linux-playground.nbi.ac.uk
 
 Two things surprise people the first time:
 
-- **A question about the host's "fingerprint"** appears on your first connection only. It's your computer asking whether it can trust this server. Type `yes` (or click **Accept** in PuTTY).
-- **Nothing appears while you type your password.** No dots, no stars. That's normal: type it and press Enter.
+**A question about the host's "fingerprint"** appears on your first connection only. It's your computer asking whether it can trust this server. Check that the fingerprint ends in `ioeWIMsAo` (the full value is `SHA256:ksjyE+ny0/uY0pyEkGenBFRHF60ejJVQl/ioeWIMsAo`), then click **Accept** in PuTTY, or type `yes` in a terminal.
+
+![PuTTY Security Alert on first connection, showing the server's ssh-ed25519 fingerprint and the Accept, Connect Once and Cancel buttons](images/linux-playground/putty-host-key.png)
+
+You'll see it again on a new computer, and that's fine. But if PuTTY ever says the host key **doesn't match** the one it has stored (*"WARNING - POTENTIAL SECURITY BREACH!"*), click **Cancel** and ask JIC Informatics.
+
+**Nothing appears while you type your password.** No dots, no stars. That's normal: type it and press Enter.
 
 You'll then see a welcome banner and a prompt like this:
 
@@ -143,6 +154,10 @@ In a course, the trainer shares their screen through linux-playground. Open **tw
 
 - **Window 1, to watch:** type `atraining`. You'll see the trainer's terminal live, with their last few commands at the top. You can't type in it. To leave, press `Ctrl-b`, then `d`.
 - **Window 2, to work:** type the commands yourself here.
+
+![The trainer's shared screen as seen with atraining: their last six commands, numbered, at the top, and their terminal below, where they are typing command 7](images/linux-playground/atraining-view.png)
+
+The top part lists the trainer's last few commands, numbered, so you can catch up if you look away. The bottom part is their live terminal.
 
 If `atraining` says `error connecting to /tmp/training`, the trainer hasn't started the session yet. Try again in a minute.
 
