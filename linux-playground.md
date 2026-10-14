@@ -159,9 +159,18 @@ In a course, the trainer shares their screen through linux-playground. Open **tw
 
 The top part lists the trainer's last few commands, numbered, so you can catch up if you look away. The bottom part is their live terminal.
 
-If `atraining` says `error connecting to /tmp/training`, the trainer hasn't started the session yet. Try again in a minute.
+If `atraining` says `error connecting to /var/lib/training/socket` or `no server running`, the trainer hasn't started the session yet. Try again in a minute.
 
-> **For trainers** (members of the `informatics` group): `ctraining` starts the shared screen, or joins it if another trainer has already started it; `kill-training` stops it at the end. Anything typed in it runs as the trainer who started it, so don't use `sudo` or open anything private there. Setup details: [linux-playground repo](https://git.nbi.ac.uk/Miguel-projects/linux-playground).
+When the trainer highlights text with the mouse, you'll see it highlighted too: that's them pointing at something.
+
+> **For trainers:**
+>
+> - `ctraining` starts the shared screen (members of `informatics` or `CiS`), or joins it if it's already running. `kill-training` stops it at the end.
+> - **Assistant trainers** join with `wtraining` and can type too. It only works for trainers: members of `informatics` or `CiS`, or anyone added to the trainers list (ask JIC Informatics).
+> - **Point with the mouse:** drag over text to highlight it for everyone; the highlight stays until you click elsewhere. The wheel scrolls back through output; press `q` to return. To copy text in PuTTY, hold Shift while dragging.
+> - Anything typed in the shared screen runs as the trainer who started it, so don't use `sudo` or open anything private there.
+>
+> Setup details: [linux-playground repo](https://git.nbi.ac.uk/Miguel-projects/linux-playground).
 
 ## 8. Being a good neighbour
 
