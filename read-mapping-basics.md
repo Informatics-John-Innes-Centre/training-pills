@@ -32,7 +32,7 @@ A resistant parent line was treated with **EMS**, a chemical that causes random 
 | `5406` | The resistant parent |
 | `M49S1`, `M52S1`, `M55S1`, `M57S1`, `M59S1`, `M61S1` | EMS mutants |
 
-Each sample is **paired-end** Illumina data: `_R1` and `_R2` are the two ends of the same DNA fragments, so the two files always go into the mapper together.
+Each sample is **paired-end** Illumina MiSeq data, with reads of 301 bases: `_R1` and `_R2` are the two ends of the same DNA fragments, so the two files always go into the mapper together.
 
 ## 2. Log in and set up your folder
 
@@ -42,10 +42,12 @@ Connect to **linux-playground** with PuTTY (Windows) or a terminal (Mac, Linux, 
 ssh <your-username>@linux-playground
 ```
 
+> **In a class?** Open a second PuTTY window or terminal, log in again and type `atraining`. That window then shows the trainer's screen, read-only, so you can follow along in one window and type in the other. Press `Ctrl-b` then `d` to leave it.
+
 So that you can open your results in Windows later, first create a folder called `informatics` in your **U drive** (using File Explorer). Then, on linux-playground:
 
 ```bash
-mountu                 # links your U drive's informatics folder to ~/u_drive
+mountu                 # links your U drive's informatics folder to ~/u_drive (asks for your password)
 ls ~/u_drive           # create a text file in Windows and check it appears here
 mkdir ~/u_drive/intro
 cd ~/u_drive/intro
@@ -184,6 +186,13 @@ bwa mem reference/refSNP.fasta rawdata/5406_R1.fastq.gz rawdata/5406_R2.fastq.gz
 grep -v '^@' mymappings/5406.sam | head -2 | cut -f1-9
 ```
 
+```text
+HWI-M01242:86:000000000-AC0YE:1:1116:18512:10339  99   contig_1795_1  998   60  301M  =  1343   608
+HWI-M01242:86:000000000-AC0YE:1:1116:18512:10339  147  contig_1795_1  1343  60  263M  =  998   -608
+```
+
+Both lines are the same pair: the first read maps forward at position 998, its mate in reverse at 1343, 608 bases of DNA fragment in total.
+
 | Column | Meaning |
 | --- | --- |
 | 1 | Read name (the same for both reads of a pair) |
@@ -191,7 +200,7 @@ grep -v '^@' mymappings/5406.sam | head -2 | cut -f1-9
 | 3 | Contig the read mapped to (`*` if unmapped) |
 | 4 | Position on that contig |
 | 5 | **Mapping quality** (MAPQ): how sure BWA is of the placement (60 = certain) |
-| 6 | **CIGAR**: how the read lines up, e.g. `300M` = 300 matching positions |
+| 6 | **CIGAR**: how the read lines up, e.g. `301M` = all 301 bases aligned; `263M` = a shorter (trimmed) read, all aligned; `283M18S` = 283 aligned and the last 18 soft-clipped (left unaligned) |
 | 7–9 | Where its mate mapped, and the fragment length |
 | 10–11 | The read's sequence and qualities |
 
@@ -223,9 +232,18 @@ rm mymappings/5406.sam
 samtools flagstat mymappings/5406.bam
 ```
 
+```text
+3746 + 0 in total (QC-passed reads + QC-failed reads)
+...
+3737 + 0 mapped (99.76% : N/A)
+...
+3734 + 0 properly paired (99.68% : N/A)
+```
+
 The lines to look at:
 
-- **`mapped`**: the percentage of reads that found a place on the reference. Here, most should, because the reads were selected for these genes. On real data, a low number points to contamination, the wrong reference, or poor-quality reads.
+- **`in total`**: 3,746 reads, which is 1,873 pairs × 2. If this doesn't match your FASTQ count, a file was cut short.
+- **`mapped`**: the percentage of reads that found a place on the reference: 99.76% here, because the reads were selected for these genes. On real data, a low number points to contamination, the wrong reference, or poor-quality reads.
 - **`properly paired`**: both reads of a pair mapped facing each other at a sensible distance, the best evidence that a placement is right.
 
 Compare yours with the provided result: `samtools flagstat mappings/5406.bam`.
@@ -255,7 +273,7 @@ done
 ls mymappings/
 ```
 
-You should end up with a `.bam` and a `.bam.bai` for all seven samples.
+You should end up with a `.bam` and a `.bam.bai` for all seven samples, each with about 99% of reads mapped.
 
 > **On real data:** add `-t 4` to `bwa mem` (and `-@ 4` to `samtools sort`) to use 4 CPUs, and run it as a [Slurm](slurm-basics.md) job on the HPC rather than on a shared machine.
 
@@ -272,6 +290,14 @@ samtools tview mymappings/M49S1.bam reference/refSNP.fasta
 - Press `g` and type a position (e.g. `contig_1791_1:1000`) to jump there, `?` for help, `q` to quit.
 
 Open the parent (`5406.bam`) at the same position: if the change is in a mutant but **not** in the parent, it's a candidate EMS mutation.
+
+**Not every difference is a mutation.** While you look, you'll also see:
+
+- **Differences shared by every sample, parent included.** The parent line isn't identical to the reference, so these were there before EMS. Not what you're looking for.
+- **Messy columns near the ends of a contig**, where few reads overlap and many are only partly aligned. Treat these with suspicion.
+- **A single odd letter** in an otherwise clean column: a sequencing error.
+
+A real EMS mutation here is in **every read** of one mutant (these lines are inbred, so it is homozygous) and in **none** of the parent's.
 
 **In IGV (easier).** Because you worked in `~/u_drive`, your files are already in `U:\informatics\intro\data` on your PC. In [IGV](https://igv.org):
 
@@ -312,7 +338,24 @@ Work through the following steps yourself to make sure everything sticks:
 - [ ] Count the reads in `M59S1_R1.fastq.gz`, and check `M59S1_R2.fastq.gz` has the same number
 - [ ] Index `refSNP.fasta` and list the files `bwa index` created
 - [ ] Map `5406` step by step (SAM → sorted BAM → index), then delete the SAM
-- [ ] Find a read in the SAM with MAPQ 60 and one with a CIGAR other than `300M`
+- [ ] Find a read in the SAM with MAPQ 60 and one with a CIGAR other than `301M`
 - [ ] Run `samtools flagstat` on your BAM and on `mappings/5406.bam`: do they agree?
 - [ ] Map all seven samples with the loop in Section 11
-- [ ] In `samtools tview` or IGV, find one position where a mutant differs from the parent, and note its contig and position
+- [ ] In `samtools tview` or IGV, find the mutation in each mutant, and note its contig, position and base change
+- [ ] Find one difference that is **not** a mutation, and explain why
+
+## Answers
+
+Check yourself after the last exercise. Each mutant carries its own mutation, and all six fall in the same contig, `contig_1795_1`: a strong hint that it is the gene behind the resistance.
+
+| Mutant | Position | Change |
+| --- | --- | --- |
+| `M49S1` | `contig_1795_1:2319` | G → T |
+| `M52S1` | `contig_1795_1:1436` | G → A |
+| `M55S1` | `contig_1795_1:2417` | G → A |
+| `M57S1` | `contig_1795_1:1489` | C → T |
+| `M57S1` | `contig_1797_1:1950` | C → T |
+| `M59S1` | `contig_1795_1:1587` | G → A |
+| `M61S1` | `contig_1795_1:3999` | C → T |
+
+Nearly all are `G` → `A` or `C` → `T`, the typical EMS signature. `contig_1793_1:753` (G → T) is in **every** sample, parent included: a difference between this line and the reference, not a mutation.
