@@ -65,7 +65,7 @@ You'll see it again on a new computer, and that's fine. But if PuTTY ever says t
 
 **Nothing appears while you type your password.** No dots, no stars. That's normal: type it and press Enter.
 
-You'll then see a welcome banner and a prompt like this:
+You'll then see a welcome banner, ending with a tip about `biowizard` (Section 8), and a prompt like this:
 
 ```text
 [username@v1373 ~]$
@@ -206,7 +206,7 @@ bwa mem ref.fa reads_R1.fastq.gz 2>&1 | tail -20 | biowizard what does this erro
 
 `2>&1` includes the error messages, and `tail -20` keeps just the end, where errors usually are.
 
-**Let it see your screen.** Run `biowizard on` once. From then on, what appears in your terminal is copied to a private file (only you can read it, it's deleted when you log out), and `biowizard` reads the last 40 lines when you ask. It stays on for future logins until you run `biowizard off`; `biowizard status` tells you whether it's on. Scrolling back in PuTTY works as usual.
+**Let it see your screen.** Run `biowizard on` once. From then on, what appears in your terminal is copied to a private file (only you can read it, it's deleted when you log out), and `biowizard` reads the last 40 lines when you ask. Your window restarts, in the same folder, with recording on (anything you'd set with `export` is cleared). It stays on for future logins until you run `biowizard off`; `biowizard status` tells you whether it's on, and so does the login banner. Scrolling back in PuTTY works as usual.
 
 Good to know:
 
@@ -234,6 +234,7 @@ Good to know:
 | `ls ~/u_drive` is empty but `U:\informatics` isn't | The link was lost when the machine restarted; run `mountu` again |
 | `command not found` | Check the spelling. If the tool isn't in Section 6, it isn't installed |
 | `biowizard: couldn't reach the model` | The model server is down or busy; ask the trainer instead |
+| `biowizard` asks you to paste, though you ran `biowizard on` | This window was opened before recording was turned on; log out and back in |
 | `No space left on device` | Your home folder or `/tmp` is full; delete what you don't need, or work in `~/u_drive` |
 
 ## 11. Your linux-playground survival kit

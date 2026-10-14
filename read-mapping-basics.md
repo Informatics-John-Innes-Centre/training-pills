@@ -156,6 +156,8 @@ samtools --version
 
 If either says `command not found`, ask the trainer, or load it as you would on the HPC (see the [HPC Software](hpc-software-basics.md) pill).
 
+> **Stuck at any step?** Ask `biowizard`, linux-playground's built-in helper, in plain English: `biowizard why did that fail?` See the [Linux Playground](linux-playground.md) pill for how it works.
+
 ## 7. Index the reference (once)
 
 Before BWA can map anything, it builds an index of the reference, a bit like the index at the back of a book, so that it can find where each read belongs quickly:
