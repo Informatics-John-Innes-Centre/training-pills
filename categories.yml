@@ -22,6 +22,9 @@ HPC & Scientific Computing:
   - hpc-software-basics
   - open-ondemand-basics
 
+Bioinformatics Tools:
+  - read-mapping-basics
+
 Workflows & Pipelines:
   - parabricks-nextflow
   - training-image-models
