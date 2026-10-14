@@ -194,7 +194,11 @@ Then run your bwa mem command again.
 
 *(An example: answers vary.)*
 
-**What it looks at.** To fit its answer to what you're doing, `biowizard` sends the model your **last 20 commands**, whether the last one **failed**, the **folder you're in** and the **names of the files** there. It can't see what's on your screen, so for an error message, run the command again and pipe its output in:
+**What it looks at.** To fit its answer to what you're doing, `biowizard` sends the model your **last 20 commands**, whether the last one **failed**, the **folder you're in** and the **names of the files** there. To see an **error message**, it needs one of these:
+
+**Paste it.** If your last command failed, `biowizard` asks you to paste the error: select it with the mouse in PuTTY (that copies it), right-click to paste, press Enter, then `Ctrl-d`. Use `biowizard -p <question>` to paste any time.
+
+**Pipe it in.** Run the command again and send its output to `biowizard`:
 
 ```bash
 bwa mem ref.fa reads_R1.fastq.gz 2>&1 | tail -20 | biowizard what does this error mean?
@@ -202,12 +206,14 @@ bwa mem ref.fa reads_R1.fastq.gz 2>&1 | tail -20 | biowizard what does this erro
 
 `2>&1` includes the error messages, and `tail -20` keeps just the end, where errors usually are.
 
+**Let it see your screen.** Run `biowizard on` once. From then on, what appears in your terminal is copied to a private file (only you can read it, it's deleted when you log out), and `biowizard` reads the last 40 lines when you ask. It stays on for future logins until you run `biowizard off`; `biowizard status` tells you whether it's on. Scrolling back in PuTTY works as usual.
+
 Good to know:
 
 - **It suggests commands; it never runs them.** Read what it suggests before you type it, especially anything with `rm`, `mv` or `>`, which delete or overwrite files.
 - **It can be wrong.** Treat its answer as a hint, and ask the trainer if it doesn't make sense or doesn't work.
 - **Up to 30 questions an hour** each. The first question after a quiet spell can take up to half a minute while the model loads; after that, answers take a few seconds.
-- **Your questions are kept**, with the context sent, so trainers can see where people get stuck. Don't ask about, or pipe in, anything confidential.
+- **Your questions are kept**, with the context sent (including the screen lines, if you turned that on), so trainers can see where people get stuck. Don't ask about, paste or pipe in anything confidential.
 - Quote or avoid `?`, `*` and `!` if your question gets mangled: the shell treats them specially. `biowizard 'why?'` is always safe.
 
 ## 9. Being a good neighbour
@@ -244,6 +250,7 @@ Good to know:
 | `command -v <tool>` | Is this tool installed, and where |
 | `atraining` | Watch the trainer's screen (`Ctrl-b` then `d` to leave) |
 | `biowizard <question>` | Ask for help; pipe a command's output in with `2>&1 \| biowizard ...` |
+| `biowizard on` / `off` / `status` | Let `biowizard` see your screen, or stop it |
 | `top` | See what's running (`q` to quit) |
 
 ## Practice exercise
