@@ -14,6 +14,7 @@ By the end of this tutorial, you will be able to:
 - Get data onto the machine and results off it
 - Find the bioinformatics tools that are already installed
 - Follow a trainer's screen during a class
+- Ask `biowizard` for help when a command doesn't do what you expected
 
 The main idea to take away:
 
@@ -172,14 +173,51 @@ When the trainer highlights text with the mouse, you'll see it highlighted too: 
 >
 > Setup details: [linux-playground repo](https://git.nbi.ac.uk/Miguel-projects/linux-playground).
 
-## 8. Being a good neighbour
+## 8. Getting help: biowizard
+
+Stuck on an error, or not sure what to type next? Ask `biowizard`, a model hosted at the NBI that knows this machine and its tools. Type your question straight after it, in plain English:
+
+```bash
+biowizard why did my last command fail?
+biowizard how do I count the reads in a fastq.gz file?
+```
+
+```text
+$ bwa mem ref.fa reads_R1.fastq.gz > out.sam
+[E::bwa_idx_load_from_disk] fail to locate the index files
+$ biowizard why did that fail?
+biowizard is thinking...
+BWA can't find the index for ref.fa: it has to be built once before mapping.
+  bwa index ref.fa
+Then run your bwa mem command again.
+```
+
+*(An example: answers vary.)*
+
+**What it looks at.** To fit its answer to what you're doing, `biowizard` sends the model your **last 20 commands**, whether the last one **failed**, the **folder you're in** and the **names of the files** there. It can't see what's on your screen, so for an error message, run the command again and pipe its output in:
+
+```bash
+bwa mem ref.fa reads_R1.fastq.gz 2>&1 | tail -20 | biowizard what does this error mean?
+```
+
+`2>&1` includes the error messages, and `tail -20` keeps just the end, where errors usually are.
+
+Good to know:
+
+- **It suggests commands; it never runs them.** Read what it suggests before you type it, especially anything with `rm`, `mv` or `>`, which delete or overwrite files.
+- **It can be wrong.** Treat its answer as a hint, and ask the trainer if it doesn't make sense or doesn't work.
+- **Up to 30 questions an hour** each. The first question after a quiet spell can take up to half a minute while the model loads; after that, answers take a few seconds.
+- **Your questions are kept**, with the context sent, so trainers can see where people get stuck. Don't ask about, or pipe in, anything confidential.
+- Quote or avoid `?`, `*` and `!` if your question gets mangled: the shell treats them specially. `biowizard 'why?'` is always safe.
+
+## 9. Being a good neighbour
 
 - **Keep it small.** Everyone shares 8 CPUs and 15 GB of memory. Exercises are sized for this; real data isn't.
 - **Don't leave things running.** Check with `top` (press `q` to quit), and stop your own runaway command with `Ctrl-c`.
 - **Clean up** large files you no longer need, especially in your home folder and `/tmp`.
 - **Nothing confidential.** It's a shared training machine.
 
-## 9. When something goes wrong
+## 10. When something goes wrong
 
 | What you see | What it means |
 | --- | --- |
@@ -189,9 +227,10 @@ When the trainer highlights text with the mouse, you'll see it highlighted too: 
 | `mount error(13): Permission denied` from `mountu` | Wrong password; run `mountu` again |
 | `ls ~/u_drive` is empty but `U:\informatics` isn't | The link was lost when the machine restarted; run `mountu` again |
 | `command not found` | Check the spelling. If the tool isn't in Section 6, it isn't installed |
+| `biowizard: couldn't reach the model` | The model server is down or busy; ask the trainer instead |
 | `No space left on device` | Your home folder or `/tmp` is full; delete what you don't need, or work in `~/u_drive` |
 
-## 10. Your linux-playground survival kit
+## 11. Your linux-playground survival kit
 
 | Command | What it does |
 | --- | --- |
@@ -204,6 +243,7 @@ When the trainer highlights text with the mouse, you'll see it highlighted too: 
 | `du -sh <folder>` / `df -h ~` | How much space a folder uses / how full the disk is |
 | `command -v <tool>` | Is this tool installed, and where |
 | `atraining` | Watch the trainer's screen (`Ctrl-b` then `d` to leave) |
+| `biowizard <question>` | Ask for help; pipe a command's output in with `2>&1 \| biowizard ...` |
 | `top` | See what's running (`q` to quit) |
 
 ## Practice exercise
@@ -216,5 +256,6 @@ Work through the following steps yourself to make sure everything sticks:
 - [ ] Check how much free space there is with `df -h ~`
 - [ ] Download a file from the [Training Repo](https://repo.informatics.jic.ac.uk/) with `wget`
 - [ ] Find `bwa` and `samtools` with `command -v`, and print their versions
+- [ ] Run a command that fails (try `bwa mem nofile.fa`), then ask `biowizard why did that fail?`
 - [ ] Log in from a second window, and log out of both with `exit`
 - [ ] Now try the [Linux](linux-basics.md) pill's exercises here
