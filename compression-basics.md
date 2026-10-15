@@ -15,7 +15,7 @@ By the end of this tutorial, you will be able to:
 
 The main idea to take away:
 
-> **Most bioinformatics tools can read compressed data directly — so the best way to "decompress" a file is often to not decompress it at all.**
+> **Most bioinformatics tools can read compressed data directly, so the best way to "decompress" a file is often to not decompress it at all.**
 
 ---
 
@@ -24,12 +24,12 @@ The main idea to take away:
 Sequencing data is huge, and most of it compresses extremely well (DNA/RNA sequence and quality strings are very repetitive). Compression gives you:
 
 - Less disk usage on shared, quota-limited storage
-- Faster transfers (fewer bytes to move — see the `rsync-basics` pill)
-- Less I/O — smaller files are quicker to read off disk
+- Faster transfers (fewer bytes to move; see the `rsync-basics` pill)
+- Less I/O: smaller files are quicker to read off disk
 
-Crucially, almost every mainstream bioinformatics tool (`bwa`, `samtools`, `bcftools`, `seqkit`, `fastqc`, ...) can read `.gz` files **directly**. That means you rarely need to keep an uncompressed copy on disk at all — decompressing a 50 GB FASTQ file just to read it is usually unnecessary work and unnecessary storage.
+Crucially, almost every mainstream bioinformatics tool (`bwa`, `samtools`, `bcftools`, `seqkit`, `fastqc`, ...) can read `.gz` files **directly**. That means you rarely need to keep an uncompressed copy on disk at all: decompressing a 50 GB FASTQ file just to read it is usually unnecessary work and unnecessary storage.
 
-## 2. `gzip` and `gunzip` — the basics
+## 2. `gzip` and `gunzip`: the basics
 
 **Compress a file**
 
@@ -75,7 +75,7 @@ zcat sample.fastq.gz | some_tool
 
 > **Why this matters:** for a large FASTQ file, decompressing it to disk first can temporarily double your disk usage (compressed + uncompressed) and cost you a lot of I/O time you didn't need to spend. Streaming with `zcat` avoids both.
 
-## 4. `tar` — bundling files and directories
+## 4. `tar`: bundling files and directories
 
 `gzip` compresses a single file. To compress a whole directory (multiple files), you first bundle it into a single archive with `tar`, typically compressing at the same time.
 
@@ -96,7 +96,7 @@ tar -czvf results.tar.gz results/
 tar -xzvf results.tar.gz
 ```
 
-**Archive without compressing** (useful if the contents are already compressed — see Section 6)
+**Archive without compressing** (useful if the contents are already compressed; see Section 6)
 
 ```bash
 tar -cvf archive.tar file1 file2
@@ -112,27 +112,27 @@ tar -xvf archive.tar
 
 ## 5. Bioinformatics compressed formats aren't all the same
 
-Plain `gzip` is not the only compression you'll meet — and for some formats, plain `gzip` is actually the wrong choice.
+Plain `gzip` is not the only compression you'll meet, and for some formats, plain `gzip` is actually the wrong choice.
 
-- **BAM** (compressed alignments) and **CRAM** (even more compressed alignments) are already compressed binary formats. There is essentially nothing left to gain by running `gzip` on a `.bam` or `.cram` file — you'll spend CPU time for little or no size reduction.
-- **`bgzip`** (block gzip, from `htslib`/`samtools`) looks like `gzip` and produces files that *are* readable by ordinary `gunzip`/`zcat` — but it compresses in independent blocks. This is what allows tools like `tabix` to build an index and jump straight to a specific region of a VCF or BED file, instead of having to decompress the whole file to find it.
+- **BAM** (compressed alignments) and **CRAM** (even more compressed alignments) are already compressed binary formats. There is essentially nothing left to gain by running `gzip` on a `.bam` or `.cram` file: you'll spend CPU time for little or no size reduction.
+- **`bgzip`** (block gzip, from `htslib`/`samtools`) looks like `gzip` and produces files that *are* readable by ordinary `gunzip`/`zcat`, but it compresses in independent blocks. This is what allows tools like `tabix` to build an index and jump straight to a specific region of a VCF or BED file, instead of having to decompress the whole file to find it.
 
 ```bash
 bgzip variants.vcf        # produces variants.vcf.gz, block-compressed
 tabix -p vcf variants.vcf.gz   # builds variants.vcf.gz.tbi, enabling random access
 ```
 
-> **Rule of thumb:** if a tool asks for a `bgzip`-compressed + `tabix`-indexed file (common for VCF/BED/GFF), plain `gzip` will not work correctly for indexed/random access — use `bgzip`, not `gzip`, for those formats.
+> **Rule of thumb:** if a tool asks for a `bgzip`-compressed + `tabix`-indexed file (common for VCF/BED/GFF), plain `gzip` will not work correctly for indexed/random access. Use `bgzip`, not `gzip`, for those formats.
 
 ## 6. Don't compress what's already compressed
 
-Running `gzip` (or `-z` in `tar`, or `-z` in `rsync`) on data that's already compressed — `.bam`, `.cram`, `.fastq.gz`, `.vcf.gz` — wastes CPU time for little or no size reduction, because there's very little redundancy left to squeeze out.
+Running `gzip` (or `-z` in `tar`, or `-z` in `rsync`) on data that's already compressed (`.bam`, `.cram`, `.fastq.gz`, `.vcf.gz`) wastes CPU time for little or no size reduction, because there's very little redundancy left to squeeze out.
 
 ```bash
-# Not useful — bam is already compressed
+# Not useful: bam is already compressed
 gzip aligned.bam
 
-# Fine — bundling already-compressed files together, without re-compressing them
+# Fine: bundling already-compressed files together, without re-compressing them
 tar -cvf aligned_files.tar aligned1.bam aligned2.bam
 ```
 
@@ -146,7 +146,7 @@ Standard `gzip` only uses a single CPU core, which can make compressing a very l
 pigz sample.fastq
 ```
 
-It produces a normal `.gz` file, fully compatible with `gunzip`/`zcat` — it's just faster to create.
+It produces a normal `.gz` file, fully compatible with `gunzip`/`zcat`; it's just faster to create.
 
 ## 8. Checking a compressed file is intact
 
@@ -170,7 +170,7 @@ No output means the file is fine; an error means something went wrong during com
 | `tar -czvf out.tar.gz dir/` | Bundle and compress a directory |
 | `tar -xzvf out.tar.gz` | Extract a `.tar.gz` archive |
 | `bgzip file` + `tabix -p <type> file.gz` | Block-compress and index a VCF/BED/GFF for random access |
-| `pigz file` | Parallel `gzip` — faster on multi-core machines |
+| `pigz file` | Parallel `gzip`, faster on multi-core machines |
 
 **The habit to remember:**
 

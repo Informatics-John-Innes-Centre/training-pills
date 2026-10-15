@@ -7,7 +7,7 @@
 
 By the end of this tutorial, you will be able to:
 
-- Explain what tmux protects on a Slurm HPC — and what Slurm already protects on its own
+- Explain what tmux protects on a Slurm HPC, and what Slurm already protects on its own
 - Start a tmux session
 - Detach from a session without stopping what's running inside it
 - Reattach to a session from anywhere
@@ -17,7 +17,7 @@ The main idea to take away:
 
 > **tmux keeps a terminal session alive on the login node, even after you disconnect.**
 
-`sbatch` jobs don't need this — Slurm already runs them on a compute node independently of your terminal. tmux matters for everything that *isn't* handed off to the scheduler.
+`sbatch` jobs don't need this: Slurm already runs them on a compute node independently of your terminal. tmux matters for everything that *isn't* handed off to the scheduler.
 
 ---
 
@@ -33,7 +33,7 @@ $ python debug_pipeline.py
 [connection lost — laptop went to sleep / VPN dropped / wifi died]
 ```
 
-That interactive session dies the instant your SSH connection drops — because it was running directly in your terminal, not managed by Slurm.
+That interactive session dies the instant your SSH connection drops, because it was running directly in your terminal, not managed by Slurm.
 
 Compare that with a batch job:
 
@@ -45,10 +45,10 @@ This one is safe with or without tmux: Slurm hands it to a compute node and it k
 
 So on an HPC, tmux is for the things Slurm *doesn't* look after:
 
-- **Interactive sessions** — our `interactive` wrapper (or `salloc`), an interactive Python/R session on a compute node
-- **Monitoring** — watching `squeue`, tailing a log file while you keep working elsewhere
-- **File transfers** — moving data to/from the login node (see Section 7)
-- **Prototyping** — testing a command interactively before wrapping it in an `sbatch` script
+- **Interactive sessions**: our `interactive` wrapper (or `salloc`), an interactive Python/R session on a compute node
+- **Monitoring**: watching `squeue`, tailing a log file while you keep working elsewhere
+- **File transfers**: moving data to/from the login node (see Section 7)
+- **Prototyping**: testing a command interactively before wrapping it in an `sbatch` script
 
 ```text
 Your laptop          Login node              Compute node
@@ -84,7 +84,7 @@ Your terminal now looks almost the same, but you're inside a tmux session. You'l
 interactive
 ```
 
-Now you're on a compute node, working interactively — testing a script, debugging, running an interactive Python/R session. This is tied to your terminal, so it's exactly the kind of thing to protect with tmux.
+Now you're on a compute node, working interactively: testing a script, debugging, running an interactive Python/R session. This is tied to your terminal, so it's exactly the kind of thing to protect with tmux.
 
 **Monitoring a job you've already submitted with `sbatch`**
 
@@ -95,7 +95,7 @@ tail -f slurm-12345.out
 
 Leave this running in a tmux session so you can check progress from anywhere, without re-typing the command every time you log back in.
 
-## 4. Detach — leave the job running
+## 4. Detach: leave the job running
 
 To step away without losing what's running inside it, **detach** from the session:
 
@@ -111,21 +111,21 @@ You'll land back in your normal terminal, and you'll see something like:
 [detached (from session monitor)]
 ```
 
-Whatever is inside the session — your interactive `srun` job, your `tail -f`, your `squeue` — keeps running on the login/compute node. You can now close your laptop, lose wifi, or log out completely — it doesn't matter.
+Whatever is inside the session (your interactive `srun` job, your `tail -f`, your `squeue`) keeps running on the login/compute node. You can now close your laptop, lose wifi, or log out completely; it doesn't matter.
 
-## 5. Reattach — check back in
+## 5. Reattach: check back in
 
-Log back in (from anywhere — office, home, a different laptop) and reattach:
+Log back in (from anywhere: office, home, a different laptop) and reattach:
 
 ```bash
 tmux attach -t monitor
 ```
 
-You're back exactly where you left off — check the log output, see if your interactive session is still alive, or keep working.
+You're back exactly where you left off: check the log output, see if your interactive session is still alive, or keep working.
 
 ## 6. Working with multiple sessions
 
-You can have several sessions running at once — for example, one for monitoring jobs and one for an interactive debugging session.
+You can have several sessions running at once, for example one for monitoring jobs and one for an interactive debugging session.
 
 **List all sessions**
 
@@ -150,11 +150,11 @@ tmux attach -t debug
 tmux kill-session -t monitor
 ```
 
-> **Important:** A session only disappears when you kill it or the server reboots — simply detaching does not stop it. If you don't need the session anymore, kill it to keep things tidy (and free up the interactive allocation if it was an `srun` session).
+> **Important:** A session only disappears when you kill it or the server reboots; simply detaching does not stop it. If you don't need the session anymore, kill it to keep things tidy (and free up the interactive allocation if it was an `srun` session).
 
 ## 7. Moving large files
 
-Copying sequencing data or results between servers runs on the login node, not through Slurm — so it's just as vulnerable to a dropped connection as any other interactive command. A multi-GB transfer can easily take hours. Run it in tmux the same way you'd run any other interactive task.
+Copying sequencing data or results between servers runs on the login node, not through Slurm, so it's just as vulnerable to a dropped connection as any other interactive command. A multi-GB transfer can easily take hours. Run it in tmux the same way you'd run any other interactive task.
 
 **Start a session for the transfer**
 
@@ -180,15 +180,15 @@ Ctrl-b, then d
 tmux attach -t transfer
 ```
 
-> **Tip:** Prefer `rsync -avP` over `scp` for large or unreliable transfers — if the connection drops, re-running the same `rsync` command only copies what's missing, rather than the whole file again.
+> **Tip:** Prefer `rsync -avP` over `scp` for large or unreliable transfers: if the connection drops, re-running the same `rsync` command only copies what's missing, rather than the whole file again.
 
-> **Note:** Large transfers are often run from a dedicated data mover node rather than the login node. Some data movers don't have `tmux` installed — if so, use `screen` instead (`screen -S <name>` to start, `Ctrl-a d` to detach, `screen -r <name>` to reattach). See the `rsync-basics` pill for a full rsync walkthrough, including this mapping and other gotchas (trailing slashes, compression, symlinks vs hard links).
+> **Note:** Large transfers are often run from a dedicated data mover node rather than the login node. Some data movers don't have `tmux` installed; if so, use `screen` instead (`screen -S <name>` to start, `Ctrl-a d` to detach, `screen -r <name>` to reattach). See the `rsync-basics` pill for a full rsync walkthrough, including this mapping and other gotchas (trailing slashes, compression, symlinks vs hard links).
 
 ## 8. A typical bioinformatics workflow
 
 ```text
 ssh hpc.nbi.ac.uk
-sbatch assembly.sh              (job runs on a compute node, managed by Slurm —
+sbatch assembly.sh              (job runs on a compute node, managed by Slurm,
   ↓                              this part survives disconnects on its own)
 tmux new -s monitor
   ↓

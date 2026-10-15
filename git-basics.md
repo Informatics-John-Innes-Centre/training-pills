@@ -51,7 +51,7 @@ Why this is useful for you as a researcher:
 - Share scripts with colleagues
 - Make your computational work more reproducible
 
-This tutorial focuses on tracking scripts, not on becoming a software developer — you only need a handful of commands.
+This tutorial focuses on tracking scripts, not on becoming a software developer. You only need a handful of commands.
 
 ## 2. Git vs GitLab
 
@@ -152,7 +152,7 @@ You should see something similar to:
 
 ## 5. Make a change
 
-Now modify `analyse.py` — for example, change the analysis or add another calculation.
+Now modify `analyse.py`, for example change the analysis or add another calculation.
 
 **Check what changed**
 
@@ -187,7 +187,7 @@ Every commit represents a version of your work.
 
 ## 6. Ignoring files with `.gitignore`
 
-`git add .` stages *everything* in the directory — including files you probably don't want in your Git history, such as:
+`git add .` stages *everything* in the directory, including files you probably don't want in your Git history, such as:
 
 - Large or raw data files (`*.csv`, `*.fastq`, `results/`)
 - Generated output (plots, `*.png`, `*.pdf`)
@@ -307,11 +307,11 @@ git commit -m "Update analysis parameters"
 git push
 ```
 
-Refresh GitLab — the new commit should now appear in the repository history.
+Refresh GitLab. The new commit should now appear in the repository history.
 
 ## 10. Working with branches
 
-So far, every commit has gone straight onto your main line of history (`main`). A **branch** lets you try something out — a new analysis approach, a risky refactor — without touching the working version of your script.
+So far, every commit has gone straight onto your main line of history (`main`). A **branch** lets you try something out (a new analysis approach, a risky refactor) without touching the working version of your script.
 
 ```text
                   ┌── new-analysis: try alternative method
@@ -344,7 +344,7 @@ git commit -m "Try alternative normalisation method"
 git checkout main
 ```
 
-Notice that your script reverts to the `main` version — the changes are safely tucked away on `new-analysis` until you're ready for them.
+Notice that your script reverts to the `main` version. The changes are safely tucked away on `new-analysis` until you're ready for them.
 
 **Step 4 — If the new approach works, merge it back into `main`**
 
@@ -369,7 +369,7 @@ git branch
 
 The branch with a `*` next to it is the one you're currently on.
 
-> **Why this matters for research:** branches let you try a different statistical method, a new set of parameters, or a reanalysis — without risking the version of the script that already works.
+> **Why this matters for research:** branches let you try a different statistical method, a new set of parameters, or a reanalysis, without risking the version of the script that already works.
 
 ## 11. Looking back at previous versions
 

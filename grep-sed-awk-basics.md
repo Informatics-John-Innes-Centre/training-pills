@@ -14,15 +14,15 @@ By the end of this tutorial, you will be able to:
 
 The main idea to take away:
 
-> **`grep` finds the lines you want, `sed` edits them, `awk` works with their columns — together they cover most of what people otherwise reach for a full script to do.**
+> **`grep` finds the lines you want, `sed` edits them, `awk` works with their columns. Together they cover most of what people otherwise reach for a full script to do.**
 
 ---
 
 ## 1. Why these three tools?
 
-A huge amount of bioinformatics data is plain text with a simple structure: VCF, SAM, BED, GFF, FASTA, sample sheets, pipeline logs. `grep`/`sed`/`awk` let you search, edit, and extract from these files directly on the command line — often faster than opening a script, and perfectly suited to a quick check on a remote server.
+A huge amount of bioinformatics data is plain text with a simple structure: VCF, SAM, BED, GFF, FASTA, sample sheets, pipeline logs. `grep`/`sed`/`awk` let you search, edit, and extract from these files directly on the command line, often faster than opening a script, and perfectly suited to a quick check on a remote server.
 
-## 2. `grep` — finding lines
+## 2. `grep`: finding lines
 
 **Basic search**
 
@@ -52,7 +52,7 @@ Counts sequences in a FASTA file, by counting lines starting with `>`.
 grep -n "ERROR" pipeline.log
 ```
 
-**Invert the match — show lines that *don't* match**
+**Invert the match**, show lines that *don't* match
 
 ```bash
 grep -v "^#" variants.vcf
@@ -66,7 +66,7 @@ Skips VCF header lines (which start with `#`), leaving just the variant records.
 grep -B2 -A2 "ERROR" pipeline.log
 ```
 
-Shows 2 lines before (`-B`) and after (`-A`) each match — useful for seeing what led up to an error.
+Shows 2 lines before (`-B`) and after (`-A`) each match, useful for seeing what led up to an error.
 
 **Extended regular expressions**
 
@@ -76,7 +76,7 @@ grep -E "chr(1|2|X)" regions.bed
 
 `-E` enables patterns like alternation (`|`), so you can match several options at once.
 
-## 3. `sed` — editing lines
+## 3. `sed`: editing lines
 
 **Substitute the first match on each line**
 
@@ -90,7 +90,7 @@ sed 's/old/new/' file.txt
 sed 's/old/new/g' file.txt
 ```
 
-**A real example — stripping a `chr` prefix from a BED file**
+**A real example**: stripping a `chr` prefix from a BED file
 
 ```bash
 sed 's/^chr//' regions.bed
@@ -118,9 +118,9 @@ sed -n '5,10p' file.txt
 sed '/^#/d' variants.vcf
 ```
 
-(Equivalent to `grep -v "^#"` from Section 2 — the same job, different tool.)
+(Equivalent to `grep -v "^#"` from Section 2: the same job, different tool.)
 
-## 4. `awk` — working with columns
+## 4. `awk`: working with columns
 
 By default, `awk` splits each line into fields on whitespace: `$1` is the first field, `$2` the second, and so on; `$0` is the whole line; `NF` is the number of fields on the current line.
 
@@ -158,7 +158,7 @@ Prints chromosome, position, and quality score, only for `PASS` variants.
 awk '{sum += $2} END {print sum}' coverage.txt
 ```
 
-`END { }` runs once, after every line has been processed — a common pattern for totals.
+`END { }` runs once, after every line has been processed, a common pattern for totals.
 
 **Combine with `sort`/`uniq` for a quick tally**
 
@@ -168,9 +168,9 @@ awk '{print $1}' regions.bed | sort | uniq -c
 
 Counts how many regions fall on each chromosome.
 
-> **Tip:** `awk` syntax is famously fiddly — field separators, quoting, `BEGIN`/`END` blocks — and it's one of the easiest things to get an AI assistant to write or explain for you. Describe what you want in plain English ("print the second column where the fourth column is greater than 30, tab-separated"), ask it to generate the `awk` one-liner, then run it on a small test file to confirm it does what you expect before trusting it on the real data. The same goes for a fiddly `sed` substitution or regular expression you're not confident about — there's no need to memorise the syntax when you can ask for help and verify the result.
+> **Tip:** `awk` syntax is famously fiddly (field separators, quoting, `BEGIN`/`END` blocks), and it's one of the easiest things to get an AI assistant to write or explain for you. Describe what you want in plain English ("print the second column where the fourth column is greater than 30, tab-separated"), ask it to generate the `awk` one-liner, then run it on a small test file to confirm it does what you expect before trusting it on the real data. The same goes for a fiddly `sed` substitution or regular expression you're not confident about. There's no need to memorise the syntax when you can ask for help and verify the result.
 
-## 5. Putting it together — a real pipeline
+## 5. Putting it together: a real pipeline
 
 **Extract `PASS` variants from a VCF, keep chromosome/position/quality, and count them**
 

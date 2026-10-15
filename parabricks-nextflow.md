@@ -66,11 +66,11 @@ Repository: `https://git.nbi.ac.uk/workflows/parabricks-germline-nf`
 
 ## 3. Just enough Nextflow
 
-- **Process** — one step of the pipeline (e.g. `PBRUN_GERMLINE`). Each sample, or each contig, becomes its own **task**, and on the cluster each task is its own Slurm job.
-- **Work directory** — every task runs in its own folder under `work/` (e.g. `work/8d/1e7b43...`). It holds the task's script (`.command.sh`), its log (`.command.log`) and its errors (`.command.err`). This is where you look when something fails.
-- **Container** — every process runs inside a fixed image (Parabricks 4.3.2, bcftools 1.21, ...), so everyone gets the same tool versions.
-- **Profile** — a named bundle of settings chosen with `-profile`. `jic` sets the right partitions, GPUs, local SSD and containers for our cluster; `test` uses a tiny bundled dataset.
-- **`-resume`** — reuse every task that already finished successfully. You almost always want it.
+- **Process**: one step of the pipeline (e.g. `PBRUN_GERMLINE`). Each sample, or each contig, becomes its own **task**, and on the cluster each task is its own Slurm job.
+- **Work directory**: every task runs in its own folder under `work/` (e.g. `work/8d/1e7b43...`). It holds the task's script (`.command.sh`), its log (`.command.log`) and its errors (`.command.err`). This is where you look when something fails.
+- **Container**: every process runs inside a fixed image (Parabricks 4.3.2, bcftools 1.21, ...), so everyone gets the same tool versions.
+- **Profile**: a named bundle of settings chosen with `-profile`. `jic` sets the right partitions, GPUs, local SSD and containers for our cluster; `test` uses a tiny bundled dataset.
+- **`-resume`**: reuse every task that already finished successfully. You almost always want it.
 
 > **Note:** Nextflow options have **one dash** (`-profile`, `-resume`); pipeline options have **two** (`--samplesheet`, `--ref`).
 

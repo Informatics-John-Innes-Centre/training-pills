@@ -16,13 +16,13 @@ By the end of this tutorial, you will be able to:
 
 The main idea to take away:
 
-> **nano is the simplest editor available on almost every server — you don't need to leave the terminal (or your tmux session) to fix a script.**
+> **nano is the simplest editor available on almost every server. You don't need to leave the terminal (or your tmux session) to fix a script.**
 
 ---
 
 ## 1. Why nano?
 
-Working on an HPC, you'll constantly need to tweak something without transferring a file back and forth to your laptop: a Slurm submission script, a sample sheet, a config file, a one-line fix to a pipeline script. `nano` is installed almost everywhere, has no learning curve to speak of, and — unlike `vim`/`emacs` — shows you the available commands on screen the whole time.
+Working on an HPC, you'll constantly need to tweak something without transferring a file back and forth to your laptop: a Slurm submission script, a sample sheet, a config file, a one-line fix to a pipeline script. `nano` is installed almost everywhere, has no learning curve to speak of, and, unlike `vim`/`emacs`, shows you the available commands on screen the whole time.
 
 ```text
 $ nano align_job.sh
@@ -39,7 +39,7 @@ When nano opens, the bottom of the screen shows the commands available, using `^
 ^X Exit       ^R Read File   ^\ Replace    ^U Paste Text
 ```
 
-So `^O` means "hold `Ctrl` and press `O`". You don't need to memorise the full list — it's always on screen if you forget.
+So `^O` means "hold `Ctrl` and press `O`". You don't need to memorise the full list: it's always on screen if you forget.
 
 ## 3. Opening and creating files
 
@@ -47,7 +47,7 @@ So `^O` means "hold `Ctrl` and press `O`". You don't need to memorise the full l
 nano align_job.sh
 ```
 
-If `align_job.sh` doesn't exist yet, nano creates it — there's no separate "new file" step.
+If `align_job.sh` doesn't exist yet, nano creates it; there's no separate "new file" step.
 
 **Open at a specific line** (useful when an error message tells you exactly where the problem is):
 
@@ -66,7 +66,7 @@ Arrow keys move the cursor as normal. A few shortcuts that save time:
 | `Ctrl+Y` | Page up |
 | `Ctrl+V` | Page down |
 
-Typing just inserts text at the cursor, and `Backspace`/`Delete` remove characters — no special "insert mode" to switch into.
+Typing just inserts text at the cursor, and `Backspace`/`Delete` remove characters; no special "insert mode" to switch into.
 
 ## 5. Saving and exiting
 
@@ -76,7 +76,7 @@ Typing just inserts text at the cursor, and `Backspace`/`Delete` remove characte
 Ctrl+O
 ```
 
-nano will show the current filename and ask you to confirm — press `Enter` to save under that name.
+nano will show the current filename and ask you to confirm; press `Enter` to save under that name.
 
 **Exit**
 
@@ -84,9 +84,9 @@ nano will show the current filename and ask you to confirm — press `Enter` to 
 Ctrl+X
 ```
 
-If you have unsaved changes, nano asks `Save modified buffer?` before exiting — `Y` to save and exit, `N` to discard changes and exit, `Ctrl+C` to cancel and go back to editing.
+If you have unsaved changes, nano asks `Save modified buffer?` before exiting: `Y` to save and exit, `N` to discard changes and exit, `Ctrl+C` to cancel and go back to editing.
 
-> **Tip:** `Ctrl+O` then `Ctrl+X` is the two-keystroke habit worth building — save, then exit.
+> **Tip:** `Ctrl+O` then `Ctrl+X` is the two-keystroke habit worth building: save, then exit.
 
 ## 6. Searching and replacing
 
@@ -117,9 +117,9 @@ Pressing `Ctrl+K` repeatedly on consecutive lines cuts them all into the same cl
 
 ## 8. A couple of things worth knowing before you rely on nano
 
-- **Line numbers**: start nano with `nano -l align_job.sh` (or press `Alt+#` inside nano) to show line numbers — handy when a tool's error message points you to a specific line.
+- **Line numbers**: start nano with `nano -l align_job.sh` (or press `Alt+#` inside nano) to show line numbers, handy when a tool's error message points you to a specific line.
 - **Tabs vs spaces matter in some files.** If you're editing a YAML config or a Python script, be aware that mixing tabs and spaces can break it in ways that are hard to spot visually. If in doubt, check your editor's whitespace settings, or use `cat -A file` to reveal hidden tab/space characters.
-- **Executable scripts**: nano only edits the file's contents — if you've just written a new shell script, remember to make it executable afterwards:
+- **Executable scripts**: nano only edits the file's contents; if you've just written a new shell script, remember to make it executable afterwards:
 
 ```bash
 chmod +x align_job.sh

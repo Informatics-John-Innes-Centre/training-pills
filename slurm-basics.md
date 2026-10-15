@@ -44,16 +44,16 @@ You                     Slurm                    Compute nodes
 
 ## 2. Key concepts
 
-- **Job** — a piece of work you submit: a script, or a single command.
-- **Partition** — a named group of nodes with its own limits (e.g. maximum walltime, node type). You choose one when submitting.
-- **Node** — a physical machine in the cluster.
-- **Task/array index** — when you submit a *job array* (Section 7), each individual run is one task, identified by an array index.
+- **Job**: a piece of work you submit: a script, or a single command.
+- **Partition**: a named group of nodes with its own limits (e.g. maximum walltime, node type). You choose one when submitting.
+- **Node**: a physical machine in the cluster.
+- **Task/array index**: when you submit a *job array* (Section 7), each individual run is one task, identified by an array index.
 
 ## 3. Loading the software your job needs
 
-A compute node starts with a bare environment — it doesn't automatically have the same software loaded as your interactive login shell. Load whatever your job depends on inside the script itself, not just in your terminal beforehand. The [HPC Software](hpc-software-basics.md) pill covers finding and loading software in more detail.
+A compute node starts with a bare environment: it doesn't automatically have the same software loaded as your interactive login shell. Load whatever your job depends on inside the script itself, not just in your terminal beforehand. The [HPC Software](hpc-software-basics.md) pill covers finding and loading software in more detail.
 
-**Lmod** — the module system used here. `ml` is shorthand for `module load`:
+**Lmod**: the module system used here. `ml` is shorthand for `module load`:
 
 ```bash
 ml samtools/1.19
@@ -74,7 +74,7 @@ source ~/miniconda3/etc/profile.d/conda.sh
 conda activate rnaseq-env
 ```
 
-> **Why this matters:** a job that works when you test a command interactively can still fail under `sbatch` if the script itself never loads the right module or environment — the compute node doesn't inherit it automatically.
+> **Why this matters:** a job that works when you test a command interactively can still fail under `sbatch` if the script itself never loads the right module or environment, since the compute node doesn't inherit it automatically.
 
 ## 4. A minimal job script
 
@@ -93,7 +93,7 @@ echo "Running on $(hostname)"
 python my_script.py
 ```
 
-The `#SBATCH` lines are resource requests, not comments Slurm ignores — they tell the scheduler what your job needs before it runs. `%j` in the output filename is replaced with the job ID, so repeated runs don't overwrite each other's logs.
+The `#SBATCH` lines are resource requests, not comments Slurm ignores: they tell the scheduler what your job needs before it runs. `%j` in the output filename is replaced with the job ID, so repeated runs don't overwrite each other's logs.
 
 **Submit it**
 
@@ -112,7 +112,7 @@ squeue -u $USER              # is it queued (PD) or running (R)?
 tail -f my-analysis-123456.log   # watch the output live
 ```
 
-`squeue` output includes a `ST` (state) column — `PD` means pending (still queued), `R` means running. If a job stays `PD` for a long time, `squeue --start -j <jobid>` gives Slurm's estimate of when it'll begin.
+`squeue` output includes a `ST` (state) column: `PD` means pending (still queued), `R` means running. If a job stays `PD` for a long time, `squeue --start -j <jobid>` gives Slurm's estimate of when it'll begin.
 
 **Cancel a job**
 
@@ -128,11 +128,11 @@ Before wrapping something in an `sbatch` script, it's often faster to test it in
 interactive
 ```
 
-This puts you on a compute node with an interactive shell, so you can run commands one at a time, check that paths and modules are correct, and debug errors as they happen — rather than waiting for a queued batch job to fail and then reading the log.
+This puts you on a compute node with an interactive shell, so you can run commands one at a time, check that paths and modules are correct, and debug errors as they happen, rather than waiting for a queued batch job to fail and then reading the log.
 
 > **Keep it alive:** an interactive session is tied to your terminal, so it dies if your connection drops. Run it inside `tmux` (or `screen` on a data mover node) so you can detach and reattach safely.
 
-## 7. Job arrays — one script, many samples
+## 7. Job arrays: one script, many samples
 
 Bioinformatics work is usually "run the same thing on every sample." Rather than writing 96 nearly-identical `sbatch` scripts, submit one **job array**:
 
@@ -153,8 +153,8 @@ bwa mem ref.fa "${SAMPLE}_R1.fastq.gz" "${SAMPLE}_R2.fastq.gz" \
   | samtools sort -o "${SAMPLE}.bam"
 ```
 
-- `--array=1-96%20` submits 96 tasks (indices 1–96), but runs at most 20 at a time — considerate to other users sharing the cluster.
-- `$SLURM_ARRAY_TASK_ID` is the one thing that differs between tasks — here it's used to pick a sample name out of a `samples.txt` list, one per line.
+- `--array=1-96%20` submits 96 tasks (indices 1–96), but runs at most 20 at a time, considerate to other users sharing the cluster.
+- `$SLURM_ARRAY_TASK_ID` is the one thing that differs between tasks; here it's used to pick a sample name out of a `samples.txt` list, one per line.
 - `%A_%a` in the output filename expands to the overall array job ID and the individual task index, so each sample gets its own log.
 
 ## 8. Chaining pipeline steps with dependencies
@@ -166,7 +166,7 @@ jobid1=$(sbatch --parsable align.sh)
 sbatch --dependency=afterok:$jobid1 variant_call.sh
 ```
 
-`--parsable` makes `sbatch` print just the job ID, so you can capture it in a variable. `afterok` means "only start once the first job finished successfully" — if it fails, the dependent job is cancelled rather than running on incomplete input.
+`--parsable` makes `sbatch` print just the job ID, so you can capture it in a variable. `afterok` means "only start once the first job finished successfully"; if it fails, the dependent job is cancelled rather than running on incomplete input.
 
 ## 9. Checking resource usage after a job finishes
 
@@ -185,7 +185,7 @@ CPU Efficiency: 42.10% of 04:00:00 core-walltime
 Memory Efficiency: 61.35% of 8.00 GB
 ```
 
-Low CPU efficiency usually means you asked for more CPUs than the job actually used; low memory efficiency means you over-requested memory. Use this to size your *next* job's request more accurately — over-asking just makes it wait longer in the queue for resources it won't use.
+Low CPU efficiency usually means you asked for more CPUs than the job actually used; low memory efficiency means you over-requested memory. Use this to size your *next* job's request more accurately: over-asking just makes it wait longer in the queue for resources it won't use.
 
 ## 10. When a job fails
 
@@ -197,15 +197,15 @@ tail -n 50 my-analysis-123456.log
 
 **Common causes:**
 
-- **Out of memory** — the log (or `sacct -j <jobid> --format=State`) shows `OUT_OF_MEMORY`, or the process is simply killed with no clear error. Re-run with a higher `--mem`, informed by what `seff` showed for a similar job.
-- **Exceeded the time limit** — `State` shows `TIMEOUT`. Increase `--time`, or check whether the job is genuinely stuck rather than just slow.
-- **Software not found** — the script ran, but a command failed immediately. Check that the right `ml`/`source package`/`conda activate` is actually inside the script (Section 3), not just run in your interactive shell beforehand.
+- **Out of memory**: the log (or `sacct -j <jobid> --format=State`) shows `OUT_OF_MEMORY`, or the process is simply killed with no clear error. Re-run with a higher `--mem`, informed by what `seff` showed for a similar job.
+- **Exceeded the time limit**: `State` shows `TIMEOUT`. Increase `--time`, or check whether the job is genuinely stuck rather than just slow.
+- **Software not found**: the script ran, but a command failed immediately. Check that the right `ml`/`source package`/`conda activate` is actually inside the script (Section 3), not just run in your interactive shell beforehand.
 
 ## 11. A few habits worth building
 
 - **Ask for what you need, not more.** Over-requesting CPUs/memory just means your job waits longer in the queue for resources it won't use.
 - **Give your job a sensible `--time` limit.** Too short and it gets killed before finishing; too long and it may queue longer than necessary.
-- **Check `sacct`/`seff` after a job finishes**, not just whether it completed — it tells you whether your resource request actually matched what you used.
+- **Check `sacct`/`seff` after a job finishes**, not just whether it completed. It tells you whether your resource request actually matched what you used.
 - **Test interactively before scaling up.** Get one sample working with `interactive` before submitting a 96-way array job.
 
 ## 12. Your Slurm survival kit

@@ -16,7 +16,7 @@ By the end of this pill, you will be able to:
 
 The main idea to take away:
 
-> **Open OnDemand is a web portal onto the same HPC cluster you'd reach over SSH — file browser, shell, job management, and graphical apps, all through a browser tab, no plugins or client software to install.**
+> **Open OnDemand is a web portal onto the same HPC cluster you'd reach over SSH: file browser, shell, job management, and graphical apps, all through a browser tab, no plugins or client software to install.**
 
 ---
 
@@ -32,7 +32,7 @@ you the same cluster through a web browser instead:
 - Graphical desktop environments and desktop applications (Jupyter, RStudio,
   a full desktop, and more)
 
-Nothing about the underlying cluster changes — it's the same filesystem, the
+Nothing about the underlying cluster changes: it's the same filesystem, the
 same Slurm queue, the same partitions. Open OnDemand is just a different
 front door, useful when you're on a machine without an SSH client, want a
 GUI app without setting up X11/VNC yourself, or just prefer working in a
@@ -40,7 +40,7 @@ browser tab.
 
 ## 2. Accessing Open OnDemand
 
-You need a registered, active HPC account — same credentials as everywhere
+You need a registered, active HPC account, same credentials as everywhere
 else on the cluster. Point a browser at:
 
 ```text
@@ -70,7 +70,7 @@ one-off tasks. (For moving a lot of data, or automating transfers, the
 ## 4. Shell access
 
 **Cluster → Shell Access** opens a terminal straight into the cluster's
-submission nodes — the same place an SSH client would put you — entirely in
+submission nodes (the same place an SSH client would put you) entirely in
 the browser tab. Close the tab when you're done; there's nothing extra to
 disconnect.
 
@@ -78,9 +78,9 @@ disconnect.
 
 Under the **Jobs** menu:
 
-- **Active Jobs** — view and manage jobs you've already submitted, a
+- **Active Jobs**: view and manage jobs you've already submitted, a
   browser-based alternative to `squeue`.
-- **Job Composer** — build and submit a job through a form-based interface
+- **Job Composer**: build and submit a job through a form-based interface
   instead of writing an `sbatch` script by hand. Useful for getting started;
   once you're comfortable with Slurm directly, see the `slurm-basics` pill
   for the script-based workflow, which gives you more control and is easier
@@ -89,8 +89,8 @@ Under the **Jobs** menu:
 ## 6. Interactive apps
 
 This is where Open OnDemand earns its keep for graphical work: launch an app
-as an interactive session on a compute node, and it streams to your browser
-— no VNC/X11 setup on your end. Available apps include:
+as an interactive session on a compute node, and it streams to your browser,
+no VNC/X11 setup on your end. Available apps include:
 
 - Generic Desktop
 - RELION
@@ -101,7 +101,7 @@ as an interactive session on a compute node, and it streams to your browser
 - RShiny
 
 Each launches on an actual compute node (not the login node), so you get
-real CPU/memory resources for the session — you'll typically be asked to
+real CPU/memory resources for the session. You'll typically be asked to
 specify how much before it starts.
 
 ## 7. Your Open OnDemand survival kit

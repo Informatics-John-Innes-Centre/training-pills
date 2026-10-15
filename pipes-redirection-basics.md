@@ -15,13 +15,13 @@ By the end of this tutorial, you will be able to:
 
 The main idea to take away:
 
-> **Almost every bioinformatics tool is designed to read from standard input and write to standard output — pipes and redirection are what let you connect them into a pipeline without writing a script.**
+> **Almost every bioinformatics tool is designed to read from standard input and write to standard output. Pipes and redirection are what let you connect them into a pipeline without writing a script.**
 
 ---
 
 ## 1. Why this matters
 
-`samtools`, `zcat`, `grep`, `awk`, `sort` — nearly every command-line bioinformatics tool follows the same convention: read from **standard input**, write to **standard output**, and report problems on **standard error**. Once you know that, you can connect tools together freely, instead of needing every step to have its own "output file" option.
+`samtools`, `zcat`, `grep`, `awk`, `sort`: nearly every command-line bioinformatics tool follows the same convention, reading from **standard input**, writing to **standard output**, and reporting problems on **standard error**. Once you know that, you can connect tools together freely, instead of needing every step to have its own "output file" option.
 
 ```text
 zcat sample.fastq.gz | grep -c "^@"
@@ -52,7 +52,7 @@ zcat sample.fastq.gz | wc -l
 zcat sample.fastq.gz | grep -A3 "^@READ123" | head -4
 ```
 
-Each `|` connects one more stage — there's no limit beyond readability.
+Each `|` connects one more stage; there's no limit beyond readability.
 
 ## 3. Redirecting output to a file: `>` and `>>`
 
@@ -68,17 +68,17 @@ samtools view sample.bam > sample.sam
 echo "Run finished at $(date)" >> run.log
 ```
 
-> **Danger:** `>` overwrites the destination file completely and silently, even if the command that follows fails. Never do `command file.txt > file.txt` — by the time the command reads the file, `>` has already emptied it. If you need to edit a file in place, use a tool designed for that (e.g. `sed -i`, covered in the `grep-sed-awk-basics` pill).
+> **Danger:** `>` overwrites the destination file completely and silently, even if the command that follows fails. Never do `command file.txt > file.txt`: by the time the command reads the file, `>` has already emptied it. If you need to edit a file in place, use a tool designed for that (e.g. `sed -i`, covered in the `grep-sed-awk-basics` pill).
 
 ## 4. Separating errors: `2>`
 
-Every command has two separate output streams: standard output (results) and standard error (problems). By default both print to your terminal, mixed together — but you can send them to different places.
+Every command has two separate output streams: standard output (results) and standard error (problems). By default both print to your terminal, mixed together, but you can send them to different places.
 
 ```bash
 my_pipeline.sh > results.log 2> errors.log
 ```
 
-Now `results.log` only has real output, and `errors.log` only has whatever the tool reported as an error — much easier to check "did anything go wrong?" without scrolling through normal output.
+Now `results.log` only has real output, and `errors.log` only has whatever the tool reported as an error. This is much easier to check "did anything go wrong?" without scrolling through normal output.
 
 **Combine both into a single file**, in order:
 
@@ -98,7 +98,7 @@ my_pipeline.sh > combined.log 2>&1
 samtools sort in.bam -o sorted.bam && samtools index sorted.bam
 ```
 
-If the sort fails, the index step is skipped — you won't end up indexing a broken or half-written file.
+If the sort fails, the index step is skipped: you won't end up indexing a broken or half-written file.
 
 **Run the second command only if the first failed** (`||`):
 
@@ -106,9 +106,9 @@ If the sort fails, the index step is skipped — you won't end up indexing a bro
 mkdir results || echo "Could not create results directory"
 ```
 
-**Every command's exit code drives this.** By convention, `0` means success and anything else means failure — `&&`/`||` are just checking that number for you.
+**Every command's exit code drives this.** By convention, `0` means success and anything else means failure; `&&`/`||` are just checking that number for you.
 
-## 6. Putting it together — real bioinformatics one-liners
+## 6. Putting it together: real bioinformatics one-liners
 
 **Count reads in a FASTQ file** (4 lines per read)
 
@@ -122,7 +122,7 @@ zcat sample.fastq.gz | wc -l | awk '{print $1/4}'
 grep -c "^>" genome.fasta
 ```
 
-**Extract mapped reads, sort, and index — stopping if anything fails**
+**Extract mapped reads, sort, and index, stopping if anything fails**
 
 ```bash
 samtools view -b -F 4 in.bam | samtools sort -o mapped_sorted.bam && samtools index mapped_sorted.bam

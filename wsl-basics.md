@@ -17,13 +17,13 @@ By the end of this tutorial, you will be able to:
 
 The main idea to take away:
 
-> **WSL gives you an actual Linux system running alongside Windows — the same shell, the same tools, the same commands you'll use on the HPC — without needing a second computer.**
+> **WSL gives you an actual Linux system running alongside Windows (the same shell, the same tools, the same commands you'll use on the HPC) without needing a second computer.**
 
 ---
 
 ## 1. Why WSL?
 
-Almost all bioinformatics tools (`samtools`, `bwa`, `conda`, pipeline frameworks, `ssh` clients used the "normal" way) are built for Linux first. Windows can approximate some of this, but WSL (Windows Subsystem for Linux) gives you a genuine Linux environment running directly alongside Windows — not a virtual machine you have to babysit separately.
+Almost all bioinformatics tools (`samtools`, `bwa`, `conda`, pipeline frameworks, `ssh` clients used the "normal" way) are built for Linux first. Windows can approximate some of this, but WSL (Windows Subsystem for Linux) gives you a genuine Linux environment running directly alongside Windows, not a virtual machine you have to babysit separately.
 
 This means:
 
@@ -39,7 +39,7 @@ This means:
 - If you're a local administrator on your laptop, you can install it yourself (Section 3).
 - If you're not (common on managed JIC laptops), you'll need Computing to either install it for you or grant temporary admin rights so you can run the install command yourself.
 
-> **Don't skip this step and try to work around it** — there isn't a reliable non-admin way to install WSL, so raise a ticket with Computing early if you think you'll need one.
+> **Don't skip this step and try to work around it**: there isn't a reliable non-admin way to install WSL, so raise a ticket with Computing early if you think you'll need one.
 
 ## 3. Installing WSL
 
@@ -53,13 +53,13 @@ Right-click the Start button (or search "PowerShell"), and choose **Run as admin
 wsl --install
 ```
 
-This enables the required Windows features, installs WSL2, and installs Ubuntu as the default Linux distribution — a sensible default, since most bioinformatics documentation assumes a Debian/Ubuntu-style system.
+This enables the required Windows features, installs WSL2, and installs Ubuntu as the default Linux distribution: a sensible default, since most bioinformatics documentation assumes a Debian/Ubuntu-style system.
 
 **Step 3 — Restart your computer** when prompted.
 
 ## 4. First-time setup
 
-After restarting, Ubuntu will launch automatically (or launch it from the Start menu) and finish setting itself up. You'll be asked to create a **Linux username and password** — this is separate from your Windows login, and can be anything you like.
+After restarting, Ubuntu will launch automatically (or launch it from the Start menu) and finish setting itself up. You'll be asked to create a **Linux username and password**. This is separate from your Windows login, and can be anything you like.
 
 Once you're in, update the system:
 
@@ -67,7 +67,7 @@ Once you're in, update the system:
 sudo apt update && sudo apt upgrade -y
 ```
 
-`sudo` runs a command with administrator privileges *inside* Linux — it will ask for the Linux password you just created, not your Windows one.
+`sudo` runs a command with administrator privileges *inside* Linux; it will ask for the Linux password you just created, not your Windows one.
 
 ## 5. Finding your way around
 
@@ -87,11 +87,11 @@ cd /mnt/c/Users/<your-windows-username>/
 
 Your Windows `C:` drive is mounted inside Linux under `/mnt/c/`.
 
-> **Performance tip:** keep your actual working files (scripts, test data, cloned repositories) inside the Linux file system (`~/`), not under `/mnt/c/`. Reading and writing files across the Windows/Linux boundary is noticeably slower than staying on one side — this matters once you're processing real sequencing data, even in small test form.
+> **Performance tip:** keep your actual working files (scripts, test data, cloned repositories) inside the Linux file system (`~/`), not under `/mnt/c/`. Reading and writing files across the Windows/Linux boundary is noticeably slower than staying on one side. This matters once you're processing real sequencing data, even in small test form.
 
 ## 6. Mounting other drives and network shares into `/mnt/`
 
-`C:` isn't the only thing that can show up under `/mnt/`. Any Windows drive letter — a second local disk, or a mapped network drive for shared/group storage — follows the same pattern.
+`C:` isn't the only thing that can show up under `/mnt/`. Any Windows drive letter (a second local disk, or a mapped network drive for shared/group storage) follows the same pattern.
 
 **Drive letters that were already mapped before you started WSL** usually appear automatically:
 
@@ -115,7 +115,7 @@ sudo mkdir -p /mnt/z
 sudo mount -t drvfs Z: /mnt/z
 ```
 
-**Mounting a network share directly by its UNC path** — useful for shared/group storage that isn't mapped to a drive letter at all. For example, your HPC home directory is exposed as a network share at `\\jic-hpc-data\HPC-Home`:
+**Mounting a network share directly by its UNC path**, useful for shared/group storage that isn't mapped to a drive letter at all. For example, your HPC home directory is exposed as a network share at `\\jic-hpc-data\HPC-Home`:
 
 ```bash
 sudo mkdir -p /mnt/hpchome
@@ -137,7 +137,7 @@ ls
 sudo umount /mnt/hpchome
 ```
 
-> **Note:** manual mounts (via `mount -t drvfs`) don't persist across a `wsl --shutdown` or a reboot — you'll need to re-run the mount command afterwards, unless you add them to `/etc/fstab` (below).
+> **Note:** manual mounts (via `mount -t drvfs`) don't persist across a `wsl --shutdown` or a reboot. You'll need to re-run the mount command afterwards, unless you add them to `/etc/fstab` (below).
 
 **Making a mount permanent with `/etc/fstab`**
 
@@ -152,7 +152,7 @@ Z:                      /mnt/z          drvfs   defaults 0 0
 \\jic-hpc-data\HPC-Home /mnt/hpchome    drvfs   defaults 0 0
 ```
 
-Each line is `<source> <mount point> <filesystem type> <options> <dump> <pass>` — the mount point directory must already exist (`sudo mkdir -p /mnt/hpchome` first, as above).
+Each line is `<source> <mount point> <filesystem type> <options> <dump> <pass>`. The mount point directory must already exist (`sudo mkdir -p /mnt/hpchome` first, as above).
 
 Test it without rebooting:
 
@@ -172,7 +172,7 @@ wsl
 
 from any PowerShell/Command Prompt window, or simply open **Ubuntu** from the Start menu.
 
-**Install bioinformatics tools inside WSL** just as you would on any Linux machine — for example, `miniconda`/`mambaforge` and `conda`/`mamba` environments work exactly the same as they do on the HPC.
+**Install bioinformatics tools inside WSL** just as you would on any Linux machine, for example `miniconda`/`mambaforge` and `conda`/`mamba` environments work exactly the same as they do on the HPC.
 
 **Connect to the HPC** using WSL's built-in `ssh`, no separate SSH client required:
 
@@ -180,7 +180,7 @@ from any PowerShell/Command Prompt window, or simply open **Ubuntu** from the St
 ssh your-username@hpc.nbi.ac.uk
 ```
 
-> **Note:** `hpc.nbi.ac.uk` and `slurm.nbi.ac.uk` are both aliases for the same cluster — you may see either used interchangeably in documentation or by colleagues.
+> **Note:** `hpc.nbi.ac.uk` and `slurm.nbi.ac.uk` are both aliases for the same cluster; you may see either used interchangeably in documentation or by colleagues.
 
 ## 8. Managing WSL itself (from Windows)
 
