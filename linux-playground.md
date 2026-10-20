@@ -229,7 +229,7 @@ BWA can't find the index for ref.fa: it has to be built once before mapping.
   bwa index ref.fa
 ```
 
-It won't chase every failure: it waits at least 30 seconds between unprompted answers, so retrying the same typo a few times only gets one. You can still ask `biowizard` directly anytime in between. Turn recording off (`biowizard off`) to stop this and go back to asking only when you want to.
+It won't chase every failure: retrying the exact same failing command without changing anything only gets one answer, not one per attempt. A genuinely different mistake still gets its own fresh answer right away. You can still ask `biowizard` directly anytime. Turn recording off (`biowizard off`) to stop this and go back to asking only when you want to.
 
 Good to know:
 
