@@ -170,6 +170,8 @@ When the trainer highlights text with the mouse, you'll see it highlighted too: 
 > - **Assistant trainers** join with `wtraining` and can type too. It only works for trainers: members of `informatics` or `CiS`, or anyone added to the trainers list (ask JIC Informatics).
 > - **Point with the mouse:** drag over text to highlight it for everyone; the highlight stays for 3 seconds after you let go, then clears by itself (wait for it before typing). The wheel scrolls back through output; scroll back down, or press `q`, to type again. To copy text in PuTTY, hold Shift while dragging.
 > - Anything typed in the shared screen runs as the trainer who started it, so don't use `sudo` or open anything private there.
+> - Each window's title bar shows your role ("TRAINING (trainer)", "(collaborator)" or "(student)") - purely local, so you can tell your own windows apart; it changes nothing in what anyone else sees.
+> - The shared screen's size follows whoever started it with `ctraining`, not a student's window, so one person on a small screen can't shrink the layout for everyone.
 >
 > Setup details: [linux-playground repo](https://git.nbi.ac.uk/Miguel-projects/linux-playground).
 
