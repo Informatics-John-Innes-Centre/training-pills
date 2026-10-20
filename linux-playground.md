@@ -217,6 +217,18 @@ bwa mem ref.fa reads_R1.fastq.gz 2>&1 | tail -20 | biowizard what does this erro
 
 **Let it see your screen.** Run `biowizard on` once. From then on, what appears in your terminal is copied to a private file (only you can read it, it's deleted when you log out), and `biowizard` reads the last 40 lines when you ask. Your window restarts, in the same folder, with recording on (anything you'd set with `export` is cleared). It stays on for future logins until you run `biowizard off`; `biowizard status` tells you whether it's on, and the login banner shows it in red when it's on. Scrolling back in PuTTY works as usual.
 
+**While recording is on, it also speaks up on its own** the next time a command fails, instead of waiting for you to ask:
+
+```text
+$ bwa mem ref.fa reads_R1.fastq.gz > out.sam
+[E::bwa_idx_load_from_disk] fail to locate the index files
+biowizard: that failed - here's what I think went wrong (biowizard off to stop this):
+BWA can't find the index for ref.fa: it has to be built once before mapping.
+  bwa index ref.fa
+```
+
+It won't chase every failure: it waits at least 30 seconds between unprompted answers, so retrying the same typo a few times only gets one. You can still ask `biowizard` directly anytime in between. Turn recording off (`biowizard off`) to stop this and go back to asking only when you want to.
+
 Good to know:
 
 - **It suggests commands; it never runs them.** Read what it suggests before you type it, especially anything with `rm`, `mv` or `>`, which delete or overwrite files.
