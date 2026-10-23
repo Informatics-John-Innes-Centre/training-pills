@@ -218,22 +218,25 @@ Useful options:
 | `--run_flagstat` | You want mapping statistics for every CRAM |
 | `--pbrun_args '--low-memory'` | Your GPUs have less than 40 GB of memory (not needed on our A100s) |
 
-**GPUs, CPUs and memory are sized for you.** Our GPU nodes have 4 A100s, 32 CPUs and 1000 GB of RAM, and Parabricks needs all of a job's GPUs on one node. Each sample gets GPUs according to its total FASTQ size:
+**GPUs, CPUs and memory are sized for you.** Our GPU nodes each have 32 CPUs and about 1000 GB of RAM, with 1, 2 or 4 A100 GPUs (26 GPUs in `jic-gpu`). The `jic` profile has a **ladder** of three sizes, each a fair share of a 4-GPU node so that jobs can share nodes:
 
-| FASTQ per sample | GPUs | CPUs |
-| --- | --- | --- |
-| below 300 GB | 1 | 16 |
-| 300 to 600 GB | 2 | 32 |
-| 600 GB and more | 4 | 32 |
+| Rung | GPUs | CPUs | Memory | Starts here when the sample's FASTQ is |
+| --- | --- | --- | --- | --- |
+| 1 | 1 | 8 | 240 GB | below 300 GB |
+| 2 | 2 | 16 | 480 GB | 300 to 600 GB |
+| 3 | 4 | 32 | 960 GB | 600 GB and more |
 
-Every Parabricks job gets 750 GB of memory. More GPUs mainly make big samples faster; in the Watkins wheat run, one GPU took about 5.7 hours per 100 GB of FASTQ, and the biggest samples 16 to 20 hours. If Slurm kills a job for running out of time or memory, the pipeline retries it with twice the GPUs. The log shows the choice before anything runs:
+- **Moving up.** If Slurm kills a job for running out of time or memory, the pipeline retries it on the next rung. You don't have to do anything.
+- **Keeping going.** If a sample still fails on the top rung, or fails for another reason (a corrupt FASTQ, say), it is set aside and the run finishes the others. The log names it and `results/pipeline_info/failed_samples.txt` lists it; fix the cause and resubmit the same command to add it. Use `--stop_on_failure` if you'd rather the run stopped.
+
+The log shows the starting sizes before anything runs:
 
 ```text
-GPUs per sample: 1 GPU: 266, 2 GPUs: 24, 4 GPUs: 1 (from FASTQ size, tiers 300:2,600:4, unless set in the samplesheet)
-  altria: 680 GB FASTQ -> 4 GPUs
+Starting resources (from FASTQ size, --gpu_start_gb 300,600): 1 GPU/8 CPUs/240 GB: 266, 2 GPUs/16 CPUs/480 GB: 24, 4 GPUs/32 CPUs/960 GB: 1
+  altria: 680 GB FASTQ -> 4 GPUs/32 CPUs/960 GB
 ```
 
-To change the thresholds use `--gpu_tiers '300:2,600:4'` (`<FASTQ GB>:<GPUs>`); to turn this off and use one GPU everywhere, `--auto_gpus false`.
+For a very different collection (another genome size or coverage), the thresholds (`--gpu_start_gb 300,600`) and sizes (`--gpu_ladder '1:8:240,2:16:480,4:32:960'`, as GPUs:CPUs:GB) can be changed. `results/pipeline_info/trace_*.txt` shows, for every job, the sample, its FASTQ size, which attempt (rung) it was, and the CPUs, memory and time it actually used; it's the place to look before changing anything.
 
 > **Reference index:** if the BWA index (`.amb .ann .bwt .pac .sa`) and `.fai` sit next to the FASTA, they are used as-is. Otherwise they are built and published to `results/reference/`. For a large genome that takes hours, so copy those files next to the FASTA for next time.
 
@@ -251,12 +254,12 @@ Pipeline: /jic/common/workflows/parabricks-germline-nf (v1.2.0)
 Run dir : /jic/scratch/groups/<your-group>/<you>/my-project
 ...
 Samplesheet: 762 FASTQ pairs -> 291 samples (291 with more than one pair)
-GPUs per sample: 1 GPU: 266, 2 GPUs: 24, 4 GPUs: 1 (...)
+Starting resources (...): 1 GPU/8 CPUs/240 GB: 266, 2 GPUs/16 CPUs/480 GB: 24, 4 GPUs/32 CPUs/960 GB: 1
 ```
 
 ```text
 [8d/1e7b43] BWA_INDEX (reference.fa)       | 1 of 1 ✔
-[d4/376aa8] PBRUN_GERMLINE (S3 (1 GPU))    | 3 of 3 ✔
+[d4/376aa8] PBRUN_GERMLINE (S3 (0 GB))     | 3 of 3 ✔
 [be/370374] BCF…ERGE_CHUNK (chrB:chunk2/2) | 4 of 4 ✔
 ```
 
@@ -279,12 +282,14 @@ Fix the cause, then resubmit **the same command**. Thanks to `-resume`, only the
 **Common causes:**
 
 - **`Process requirement exceeds available memory`** when running by hand in a small `interactive` session: the local executor won't start a task that asks for more than the session has. Use the `stub` profile for dry runs, and `sbatch` with `-profile jic` for real ones.
-- **`OUT_OF_MEMORY` or `TIMEOUT`** on the cluster: tasks killed by Slurm are retried automatically, up to 2 times. If one still fails, raise the matching option (`--gpu_memory`, `--merge_memory`, `--gpu_time`, ...) and resume.
+- **`OUT_OF_MEMORY` or `TIMEOUT`** on the cluster: Parabricks jobs move up the ladder automatically (Section 8), and other tasks are retried up to 2 times. A Parabricks sample that fails even on the top rung is listed in `results/pipeline_info/failed_samples.txt` while the rest of the run carries on; for other tasks, raise the matching option (`--merge_memory`, `--merge_time`, ...) and resume.
 - **Nextflow hangs at start-up:** `NXF_OFFLINE` isn't set (Section 4).
 - **A FASTQ path wasn't found:** a typo in the samplesheet. Fix it and run again.
 - **`Samplesheet check failed`:** the run lists the problems grouped by type (same file twice, lane-like sample IDs, same data in two files; see Section 6). Fix the samplesheet; nothing has been submitted yet.
 
 > **Don't delete `work/` while a project is in progress.** That's where `-resume` finds finished tasks. Once the results are safely in `results/` and you're done, delete `work/` to free scratch space; it can be huge.
+
+> **Don't change the pipeline, the samplesheet or the options in the middle of a project.** `-resume` only reuses a finished task if everything that went into it is unchanged. In the first Watkins run, restarts after changes meant about 450 samples were processed twice: roughly 2000 of the 5100 GPU-hours spent. Settle the samplesheet and options with the dry run and the tiny test, then leave them alone until the run is done.
 
 ## 11. What you get, and one important caveat
 
@@ -310,7 +315,8 @@ Without gVCFs it is different. A plain per-sample VCF lists only the sample's va
 ## 12. A few habits worth building
 
 - **Always run the dry run and the tiny GPU test first** on a new setup, before launching hundreds of samples.
-- **Read the `Samplesheet:` and `GPUs per sample:` lines** at the start of every run: check the number of samples, and that the GPU counts look sensible.
+- **Read the `Samplesheet:` and `Starting resources` lines** at the start of every run: check the number of samples, and that the sizes look sensible.
+- **Check `results/pipeline_info/failed_samples.txt`** at the end of every run. If it exists, some samples are not in the merged VCF.
 - **Always use `-resume`.** The launcher adds it for you.
 - **Keep the samplesheet and the exact command with your results**, so the analysis can be repeated.
 - **Note the pipeline version** in your methods. The first line of `nextflow_<jobid>.out` shows it, e.g. `Pipeline: /jic/common/workflows/parabricks-germline-nf (v1.2.0)`.
