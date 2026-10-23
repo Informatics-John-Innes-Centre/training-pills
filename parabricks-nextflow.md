@@ -183,8 +183,7 @@ When it finishes, check the merged VCF. `bcftools` isn't available on the comman
 BCFTOOLS="singularity exec $PIPE/containers/sif/bcftools-1.21.sif bcftools"
 $BCFTOOLS query -l results_test/merged/test.vcf.gz          # S1, S2, S3
 $BCFTOOLS view -H results_test/merged/test.vcf.gz | wc -l   # 34 variant sites
-$BCFTOOLS query -f '[%GT
-]' results_test/merged/test.vcf.gz | sort | uniq -c
+$BCFTOOLS query -f '[%GT\n]' results_test/merged/test.vcf.gz | sort | uniq -c
 ```
 
 The last command should show only `0/0` (38) and `1/1` (64), and no `./.`: every sample is well covered in the test data, so every sample has a real genotype at every site.
