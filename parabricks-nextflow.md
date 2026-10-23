@@ -57,10 +57,12 @@ The pipeline does this in three biological steps:
 ```text
 FASTQ (1+ lanes per sample)
   └─ pbrun germline (BWA-MEM + sort + markdup + HaplotypeCaller, GPU)  -> cram/<sample>.cram
-       └─ bgzip + index                                                -> vcf/<sample>.vcf.gz
-            └─ bcftools merge, per contig, in sample chunks            -> merged/per_contig/<prefix>.<contig>.vcf.gz
+       └─ bgzip + index                                                -> vcf/<sample>.g.vcf.gz
+            └─ bcftools merge --gvcf, per contig, in sample chunks     -> merged/per_contig/<prefix>.<contig>.vcf.gz
                  └─ bcftools concat (reference order)                  -> merged/<prefix>.vcf.gz
 ```
+
+Each sample's calls are written as a **gVCF**: besides the variants, it records the stretches where the sample matched the reference and how many reads covered them. When the gVCFs are merged, that lets every sample get a real genotype at every variant site, `0/0` where it was covered and matches the reference, instead of "missing" (Section 11 explains why this matters).
 
 Repository: `https://git.nbi.ac.uk/workflows/parabricks-germline-nf`
 
@@ -138,7 +140,17 @@ S2,/path/S2_R1.fastq.gz,/path/S2_R2.fastq.gz,2
 - `sample_id` becomes the sample name in the VCF. Use only letters, digits, `.`, `_` and `-`.
 - `gpus` is optional (default 1). Give high-coverage samples 2 or 4.
 - Paths can be absolute, or relative to the samplesheet's folder.
-- Every FASTQ file is checked **before** anything runs, so a typo fails in seconds rather than hours in.
+
+> **One `sample_id` per biological sample.** Every row (lane, flowcell, sequencing run) of a sample must carry the same `sample_id`. Rows with different IDs are called as different samples and become separate VCF columns, and their genotypes can't be combined afterwards: the only fix is to call the variants again. Don't add lane numbers to the ID (`cezanne_L2`, `cezanne_L3`); that is exactly how a 292-variety run once ended up with 535 VCF columns.
+
+**The samplesheet is checked before anything runs.** The run stops with a list of problems if:
+
+- a FASTQ file is missing,
+- the same FASTQ file is on two rows,
+- sample IDs differ only by a lane suffix (`x_L1`, `x_L2`); add `--allow_lane_ids` only if they really are different samples,
+- two files contain the same sequencing data, e.g. a raw file and its trimmed copy (same run, lane and index in the read headers).
+
+It also prints how FASTQ pairs were grouped, for example `Samplesheet: 762 FASTQ pairs -> 291 samples`. **Check that the sample count is what you expect** before the GPU jobs get far.
 
 ## 7. Test before you scale up
 
@@ -170,8 +182,12 @@ When it finishes, check the merged VCF. `bcftools` isn't available on the comman
 ```bash
 BCFTOOLS="singularity exec $PIPE/containers/sif/bcftools-1.21.sif bcftools"
 $BCFTOOLS query -l results_test/merged/test.vcf.gz          # S1, S2, S3
-$BCFTOOLS view -H results_test/merged/test.vcf.gz | wc -l   # about 34 variant sites
+$BCFTOOLS view -H results_test/merged/test.vcf.gz | wc -l   # 34 variant sites
+$BCFTOOLS query -f '[%GT
+]' results_test/merged/test.vcf.gz | sort | uniq -c
 ```
+
+The last command should show only `0/0` (38) and `1/1` (64), and no `./.`: every sample is well covered in the test data, so every sample has a real genotype at every site.
 
 Or load it as a module or a Software Catalogue package; the [HPC Software](hpc-software-basics.md) pill explains both:
 
@@ -215,8 +231,10 @@ tail -f nextflow_<jobid>.out        # the progress table
 The log starts with the pipeline version and the folder the run writes to:
 
 ```text
-Pipeline: /jic/common/workflows/parabricks-germline-nf (386da2a)
+Pipeline: /jic/common/workflows/parabricks-germline-nf (e154b10)
 Run dir : /jic/scratch/groups/<your-group>/<you>/my-project
+...
+Samplesheet: 762 FASTQ pairs -> 291 samples (291 with more than one pair)
 ```
 
 ```text
@@ -247,6 +265,7 @@ Fix the cause, then resubmit **the same command**. Thanks to `-resume`, only the
 - **`OUT_OF_MEMORY` or `TIMEOUT`** on the cluster: tasks killed by Slurm are retried automatically, up to 2 times. If one still fails, raise the matching option (`--gpu_memory`, `--merge_memory`, `--gpu_time`, ...) and resume.
 - **Nextflow hangs at start-up:** `NXF_OFFLINE` isn't set (Section 4).
 - **A FASTQ path wasn't found:** a typo in the samplesheet. Fix it and run again.
+- **`Samplesheet check failed`:** the run lists the problems grouped by type (same file twice, lane-like sample IDs, same data in two files; see Section 6). Fix the samplesheet; nothing has been submitted yet.
 
 > **Don't delete `work/` while a project is in progress.** That's where `-resume` finds finished tasks. Once the results are safely in `results/` and you're done, delete `work/` to free scratch space; it can be huge.
 
@@ -255,7 +274,7 @@ Fix the cause, then resubmit **the same command**. Thanks to `-resume`, only the
 ```text
 results/
 ├── cram/                   <sample>.cram (+ .crai), needs the reference FASTA to read
-├── vcf/                    <sample>.vcf.gz (+ .csi)
+├── vcf/                    <sample>.g.vcf.gz (+ .csi), per-sample gVCFs
 ├── merged/per_contig/      <prefix>.<contig>.vcf.gz
 ├── merged/<prefix>.vcf.gz  all contigs, in reference order
 ├── qc/flagstat/            mapping statistics (with --run_flagstat)
@@ -265,14 +284,19 @@ results/
 
 Sample columns in every merged VCF are sorted by `sample_id`.
 
-> **The merged VCF is not joint-genotyped.** Each sample is called on its own, then the VCFs are combined. If a site is variant in some samples, every sample with no call there shows `./.` (missing), **even if it was well covered and simply matches the reference**. Keep this in mind for missing-data filters and allele frequencies.
+**What `0/0` and `./.` mean.** In the merged VCF, `0/0` means "covered and matches the reference" and `./.` means "no reads here" (or fewer than `--gvcf_min_ref_dp`, default 1). That makes missing-data filters and allele frequencies meaningful.
+
+Without gVCFs it is different. A plain per-sample VCF lists only the sample's variants, so after merging, every sample without a call at a site gets `./.`, whether it had 20 reads matching the reference or none at all. In a diversity panel most variants are rare, so most genotypes end up `./.`, and allele frequencies count only the few samples that carry the variant (a variant in 3 of 291 samples looks fixed, AF = 1). If you ever get a VCF made that way (`--gvcf false`, or an older run), treat `./.` with great care.
+
+> **The merged VCF is not joint-genotyped.** Each sample's genotype is still decided from its own reads; the merge only fills in the reference calls. Full GATK joint genotyping (`GenomicsDBImport` + `GenotypeGVCFs`) also re-evaluates every site across all samples. The gVCFs in `vcf/` are exactly its input, so it can be run later without the GPU step.
 
 ## 12. A few habits worth building
 
 - **Always run the dry run and the tiny GPU test first** on a new setup, before launching hundreds of samples.
+- **Read the `Samplesheet:` line** at the start of every run and check the number of samples.
 - **Always use `-resume`.** The launcher adds it for you.
 - **Keep the samplesheet and the exact command with your results**, so the analysis can be repeated.
-- **Note the pipeline version** in your methods. The first line of `nextflow_<jobid>.out` shows it, e.g. `Pipeline: /jic/common/workflows/parabricks-germline-nf (386da2a)`.
+- **Note the pipeline version** in your methods. The first line of `nextflow_<jobid>.out` shows it, e.g. `Pipeline: /jic/common/workflows/parabricks-germline-nf (e154b10)` (version 1.1.0).
 - **Clean up `work/`** once a project is finished.
 
 ## 13. Your Parabricks pipeline survival kit
