@@ -131,15 +131,15 @@ This builds the four images from the `.def` files (Parabricks is the slow one) a
 A CSV with **one row per FASTQ pair**. Rows that share a `sample_id`, such as several lanes of one sample, are combined into one Parabricks run.
 
 ```csv
-sample_id,read1,read2,gpus
-S1,/path/S1_L001_R1.fastq.gz,/path/S1_L001_R2.fastq.gz,1
-S1,/path/S1_L002_R1.fastq.gz,/path/S1_L002_R2.fastq.gz,1
-S2,/path/S2_R1.fastq.gz,/path/S2_R2.fastq.gz,2
+sample_id,read1,read2
+S1,/path/S1_L001_R1.fastq.gz,/path/S1_L001_R2.fastq.gz
+S1,/path/S1_L002_R1.fastq.gz,/path/S1_L002_R2.fastq.gz
+S2,/path/S2_R1.fastq.gz,/path/S2_R2.fastq.gz
 ```
 
 - `sample_id` becomes the sample name in the VCF. Use only letters, digits, `.`, `_` and `-`.
-- `gpus` is optional (default 1). Give high-coverage samples 2 or 4.
 - Paths can be absolute, or relative to the samplesheet's folder.
+- You don't need to say how many GPUs a sample needs: the pipeline works it out from the sample's FASTQ size (Section 8). An optional `gpus` column overrides that for a sample.
 
 > **One `sample_id` per biological sample.** Every row (lane, flowcell, sequencing run) of a sample must carry the same `sample_id`. Rows with different IDs are called as different samples and become separate VCF columns, and their genotypes can't be combined afterwards: the only fix is to call the variants again. Don't add lane numbers to the ID (`cezanne_L2`, `cezanne_L3`); that is exactly how a 292-variety run once ended up with 535 VCF columns.
 
@@ -218,6 +218,23 @@ Useful options:
 | `--run_flagstat` | You want mapping statistics for every CRAM |
 | `--pbrun_args '--low-memory'` | Your GPUs have less than 40 GB of memory (not needed on our A100s) |
 
+**GPUs, CPUs and memory are sized for you.** Our GPU nodes have 4 A100s, 32 CPUs and 1000 GB of RAM, and Parabricks needs all of a job's GPUs on one node. Each sample gets GPUs according to its total FASTQ size:
+
+| FASTQ per sample | GPUs | CPUs |
+| --- | --- | --- |
+| below 300 GB | 1 | 16 |
+| 300 to 600 GB | 2 | 32 |
+| 600 GB and more | 4 | 32 |
+
+Every Parabricks job gets 750 GB of memory. More GPUs mainly make big samples faster; in the Watkins wheat run, one GPU took about 5.7 hours per 100 GB of FASTQ, and the biggest samples 16 to 20 hours. If Slurm kills a job for running out of time or memory, the pipeline retries it with twice the GPUs. The log shows the choice before anything runs:
+
+```text
+GPUs per sample: 1 GPU: 266, 2 GPUs: 24, 4 GPUs: 1 (from FASTQ size, tiers 300:2,600:4, unless set in the samplesheet)
+  altria: 680 GB FASTQ -> 4 GPUs
+```
+
+To change the thresholds use `--gpu_tiers '300:2,600:4'` (`<FASTQ GB>:<GPUs>`); to turn this off and use one GPU everywhere, `--auto_gpus false`.
+
 > **Reference index:** if the BWA index (`.amb .ann .bwt .pac .sa`) and `.fai` sit next to the FASTA, they are used as-is. Otherwise they are built and published to `results/reference/`. For a large genome that takes hours, so copy those files next to the FASTA for next time.
 
 ## 9. Watching a run
@@ -230,15 +247,16 @@ tail -f nextflow_<jobid>.out        # the progress table
 The log starts with the pipeline version and the folder the run writes to:
 
 ```text
-Pipeline: /jic/common/workflows/parabricks-germline-nf (e154b10)
+Pipeline: /jic/common/workflows/parabricks-germline-nf (v1.2.0)
 Run dir : /jic/scratch/groups/<your-group>/<you>/my-project
 ...
 Samplesheet: 762 FASTQ pairs -> 291 samples (291 with more than one pair)
+GPUs per sample: 1 GPU: 266, 2 GPUs: 24, 4 GPUs: 1 (...)
 ```
 
 ```text
 [8d/1e7b43] BWA_INDEX (reference.fa)       | 1 of 1 ✔
-[d4/376aa8] PBRUN_GERMLINE (S3)            | 3 of 3 ✔
+[d4/376aa8] PBRUN_GERMLINE (S3 (1 GPU))    | 3 of 3 ✔
 [be/370374] BCF…ERGE_CHUNK (chrB:chunk2/2) | 4 of 4 ✔
 ```
 
@@ -292,10 +310,10 @@ Without gVCFs it is different. A plain per-sample VCF lists only the sample's va
 ## 12. A few habits worth building
 
 - **Always run the dry run and the tiny GPU test first** on a new setup, before launching hundreds of samples.
-- **Read the `Samplesheet:` line** at the start of every run and check the number of samples.
+- **Read the `Samplesheet:` and `GPUs per sample:` lines** at the start of every run: check the number of samples, and that the GPU counts look sensible.
 - **Always use `-resume`.** The launcher adds it for you.
 - **Keep the samplesheet and the exact command with your results**, so the analysis can be repeated.
-- **Note the pipeline version** in your methods. The first line of `nextflow_<jobid>.out` shows it, e.g. `Pipeline: /jic/common/workflows/parabricks-germline-nf (e154b10)` (version 1.1.0).
+- **Note the pipeline version** in your methods. The first line of `nextflow_<jobid>.out` shows it, e.g. `Pipeline: /jic/common/workflows/parabricks-germline-nf (v1.2.0)`.
 - **Clean up `work/`** once a project is finished.
 
 ## 13. Your Parabricks pipeline survival kit
@@ -309,6 +327,7 @@ Without gVCFs it is different. A plain per-sample VCF lists only the sample's va
 | `nextflow run $PIPE -profile test,stub -stub` | Dry run: check the setup in seconds |
 | `NF_CONDA_ENV=nf-env sbatch $PIPE/scripts/submit_slurm.sh -profile jic ...` | Launch a run (from your project folder) |
 | `tail -f nextflow_<jobid>.out` | Follow progress |
+| `snoderes` | Free CPUs and memory on every node, e.g. whether a GPU node has room |
 | `cat work/<xx>/<hash>*/.command.err` | See why a task failed |
 | `containers/build.sh [dir]` | Build the container images yourself (on `software23`) |
 | `singularity exec $PIPE/containers/sif/bcftools-1.21.sif bcftools query -l <vcf>` | List the samples in a VCF, using the pipeline's bcftools container |
