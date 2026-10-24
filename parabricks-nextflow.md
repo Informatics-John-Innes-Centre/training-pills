@@ -218,25 +218,25 @@ Useful options:
 | `--run_flagstat` | You want mapping statistics for every CRAM |
 | `--pbrun_args '--low-memory'` | Your GPUs have less than 40 GB of memory (not needed on our A100s) |
 
-**GPUs, CPUs and memory are sized for you.** Our GPU nodes each have 32 CPUs and about 1000 GB of RAM, with 1, 2 or 4 A100 GPUs (26 GPUs in `jic-gpu`). The `jic` profile has a **ladder** of three sizes, each a fair share of a 4-GPU node so that jobs can share nodes:
+**GPUs, CPUs and memory are sized for you.** Our GPU nodes each have 32 CPUs and about 1000 GB of RAM, with 1, 2 or 4 A100 GPUs (26 GPUs in `jic-gpu`). The `jic` profile has a **ladder** of three sizes. Parabricks on these nodes is limited by CPUs rather than GPUs (a 93 GB wheat sample took 11.5 hours on 8 CPUs and about 5.7 on 16), so each job gets at least 16 CPUs:
 
 | Rung | GPUs | CPUs | Memory | Starts here when the sample's FASTQ is |
 | --- | --- | --- | --- | --- |
-| 1 | 1 | 8 | 240 GB | below 300 GB |
-| 2 | 2 | 16 | 480 GB | 300 to 600 GB |
+| 1 | 1 | 16 | 240 GB | below 300 GB |
+| 2 | 2 | 32 | 480 GB | 300 to 600 GB |
 | 3 | 4 | 32 | 960 GB | 600 GB and more |
 
-- **Moving up.** If Slurm kills a job for running out of time or memory, the pipeline retries it on the next rung. You don't have to do anything.
+- **Moving up.** If Slurm kills a job for running out of time or memory, the pipeline retries it on the next rung. You don't have to do anything. (Parabricks reports such a kill as a general error, exit 255; the pipeline checks the job's memory accounting to tell the two apart.)
 - **Keeping going.** If a sample still fails on the top rung, or fails for another reason (a corrupt FASTQ, say), it is set aside and the run finishes the others. The log names it and `results/pipeline_info/failed_samples.txt` lists it; fix the cause and resubmit the same command to add it. Use `--stop_on_failure` if you'd rather the run stopped.
 
 The log shows the starting sizes before anything runs:
 
 ```text
-Starting resources (from FASTQ size, --gpu_start_gb 300,600): 1 GPU/8 CPUs/240 GB: 266, 2 GPUs/16 CPUs/480 GB: 24, 4 GPUs/32 CPUs/960 GB: 1
+Starting resources (from FASTQ size, --gpu_start_gb 300,600): 1 GPU/16 CPUs/240 GB: 266, 2 GPUs/32 CPUs/480 GB: 24, 4 GPUs/32 CPUs/960 GB: 1
   altria: 680 GB FASTQ -> 4 GPUs/32 CPUs/960 GB
 ```
 
-For a very different collection (another genome size or coverage), the thresholds (`--gpu_start_gb 300,600`) and sizes (`--gpu_ladder '1:8:240,2:16:480,4:32:960'`, as GPUs:CPUs:GB) can be changed. `results/pipeline_info/trace_*.txt` shows, for every job, the sample, its FASTQ size, which attempt (rung) it was, and the CPUs, memory and time it actually used; it's the place to look before changing anything.
+For a very different collection (another genome size or coverage), the thresholds (`--gpu_start_gb 300,600`) and sizes (`--gpu_ladder '1:16:240,2:32:480,4:32:960'`, as GPUs:CPUs:GB) can be changed. `results/pipeline_info/trace_*.txt` shows, for every job, the sample, its FASTQ size, which attempt (rung) it was, and the CPUs, memory and time it actually used; it's the place to look before changing anything.
 
 > **Reference index:** if the BWA index (`.amb .ann .bwt .pac .sa`) and `.fai` sit next to the FASTA, they are used as-is. Otherwise they are built and published to `results/reference/`. For a large genome that takes hours, so copy those files next to the FASTA for next time.
 
@@ -254,7 +254,7 @@ Pipeline: /jic/common/workflows/parabricks-germline-nf (v1.2.0)
 Run dir : /jic/scratch/groups/<your-group>/<you>/my-project
 ...
 Samplesheet: 762 FASTQ pairs -> 291 samples (291 with more than one pair)
-Starting resources (...): 1 GPU/8 CPUs/240 GB: 266, 2 GPUs/16 CPUs/480 GB: 24, 4 GPUs/32 CPUs/960 GB: 1
+Starting resources (...): 1 GPU/16 CPUs/240 GB: 266, 2 GPUs/32 CPUs/480 GB: 24, 4 GPUs/32 CPUs/960 GB: 1
 ```
 
 ```text
