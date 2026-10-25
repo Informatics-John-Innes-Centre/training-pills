@@ -289,7 +289,7 @@ Fix the cause, then resubmit **the same command**. Thanks to `-resume`, only the
 
 > **Don't delete `work/` while a project is in progress.** That's where `-resume` finds finished tasks. Once the results are safely in `results/` and you're done, delete `work/` to free scratch space; it can be huge.
 
-> **Don't change the pipeline, the samplesheet or the options in the middle of a project.** `-resume` only reuses a finished task if everything that went into it is unchanged. In the first Watkins run, restarts after changes meant about 450 samples were processed twice: roughly 2000 of the 5100 GPU-hours spent. Settle the samplesheet and options with the dry run and the tiny test, then leave them alone until the run is done.
+> **Don't change the pipeline, the samplesheet or the options in the middle of a project.** `-resume` only reuses a finished task if everything that went into it is unchanged, and that includes the pipeline's own code: after updating the shared install (a new version, even a small fix), every sample is processed again. In the first Watkins run, restarts after changes meant about 450 samples were processed twice: roughly 2000 of the 5100 GPU-hours spent. Settle the samplesheet and options with the dry run and the tiny test, note the pipeline version from the first line of the log, and finish the project on that version.
 
 ## 11. What you get, and one important caveat
 
