@@ -6,20 +6,6 @@ the [`flask-training-pills`](https://git.nbi.ac.uk/informatics-web-services/flas
 app. This repo holds only the `.md` files, their `images/`, and `categories.yml`; the app
 itself lives separately and just reads whatever's here.
 
-## Using this with an AI assistant
-
-This repo is public and the content isn't confidential, so it works well as
-grounding material for Claude, ChatGPT or similar. Clone it locally and point
-your assistant at the folder when asking for help with JIC's HPC setup:
-
-```bash
-git clone https://github.com/Informatics-John-Innes-Centre/training-pills.git
-```
-
-Answers grounded in these pills reflect JIC's actual cluster, software
-modules and conventions, rather than generic advice that may not apply here
-(different Slurm partition names, module names, storage paths, etc.).
-
 ## Adding a pill
 
 1. Add a new `.md` file at the root of this repo, one pill per file. Plain
