@@ -25,6 +25,14 @@ The main idea to take away:
 
 ## 1. Why Slurm?
 
+**Getting there first:** everything in this pill happens on the cluster's login node, not your own laptop. Connect over SSH with your NBI username and password:
+
+```bash
+ssh <your-username>@hpc.nbi.ac.uk
+```
+
+> **Note:** `hpc.nbi.ac.uk` and `slurm.nbi.ac.uk` are both aliases for the same cluster — either works. You connect from the institute network; off site, connect to the VPN first.
+
 The login node is shared by everyone at once. Running a real analysis directly on it slows the whole cluster down for other people, and it isn't sized for heavy work anyway.
 
 Instead, you describe what your job needs (CPUs, memory, time) and hand it to Slurm, which queues it and runs it on a compute node once those resources are free:
@@ -212,6 +220,7 @@ tail -n 50 my-analysis-123456.log
 
 | Command | What it does |
 | --- | --- |
+| `ssh <user>@hpc.nbi.ac.uk` | Connect to the login node |
 | `sbatch script.sh` | Submit a job script to the queue |
 | `squeue -u $USER` | See your jobs and their status (pending/running) |
 | `scancel <jobid>` | Cancel a job |
