@@ -33,3 +33,4 @@ Workflows & Pipelines:
 
 Version Control:
   - git-basics
+  - git-dvc-genome-assembly
