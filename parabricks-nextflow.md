@@ -174,10 +174,10 @@ Every process should finish with a ✔.
 cd /jic/scratch/groups/<your-group>/<you>/my-project
 NF_CONDA_ENV=nf-env sbatch $PIPE/scripts/submit_slurm.sh -profile jic,test \
     --jic_gpu_scratch_gb 50 --min_scratch_gb 0 \
-    --max_cpus 8 --max_memory '64 GB' --gpu_cpus 8 --gpu_memory '64 GB'
+    --max_cpus 8 --max_memory '64 GB' --gpu_ladder '1:8:64'
 ```
 
-> **Why the extra options?** The test data is tiny, so these shrink the requests. Without them the job would ask for 3.5 TB of local SSD and wait in the queue for an empty node.
+> **Why the extra options?** The test data is tiny, so these shrink the requests: one small rung (1 GPU, 8 CPUs, 64 GB) and 50 GB of local SSD. Without them the job would ask for 16 CPUs, 240 GB and 850 GB of SSD, and wait longer in the queue.
 
 When it finishes, check the merged VCF. `bcftools` isn't available on the command line by default. The simplest option is the pipeline's own bcftools container, the same version that wrote the file:
 
@@ -228,7 +228,7 @@ Useful options:
 | 2 | 2 | 32 | 480 GB | 300 to 600 GB |
 | 3 | 4 | 32 | 960 GB | 600 GB and more |
 
-- **Moving up.** If Slurm kills a job for running out of time or memory, the pipeline retries it on the next rung. You don't have to do anything. (Parabricks reports such a kill as a general error, exit 255; the pipeline checks the job's memory accounting to tell the two apart.)
+- **Moving up.** If Slurm kills a job for running out of time or memory, the pipeline retries it on the next rung. You don't have to do anything. (Parabricks reports a memory kill as a general error, exit 255, so the pipeline checks the job's memory accounting to tell the two apart. The container needs to see that accounting: the `jic`, `singularity` and `apptainer` profiles give it access, so if you write your own profile, copy their `containerOptions` for Parabricks. Without it, a memory kill sets the sample aside instead of moving it up.)
 - **Keeping going.** If a sample still fails on the top rung, or fails for another reason (a corrupt FASTQ, say), it is set aside and the run finishes the others. The log names it and `results/pipeline_info/failed_samples.txt` lists it; fix the cause and resubmit the same command to add it. Use `--stop_on_failure` if you'd rather the run stopped.
 
 The log shows the starting sizes before anything runs:
