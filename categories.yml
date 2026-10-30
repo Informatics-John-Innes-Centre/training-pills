@@ -26,6 +26,8 @@ HPC & Scientific Computing:
 
 Data & Storage:
   - jic-network-storage
+  - dropoff-globus
+  - recovering-deleted-files-snapshots
 
 Bioinformatics Tools:
   - read-mapping-basics
