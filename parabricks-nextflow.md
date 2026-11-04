@@ -310,8 +310,6 @@ Sample columns in every merged VCF are sorted by `sample_id`.
 
 **What `0/0` and `./.` mean.** In the merged VCF, `0/0` means "covered and matches the reference" and `./.` means "no reads here" (or fewer than `--gvcf_min_ref_dp`, default 1). That makes missing-data filters and allele frequencies meaningful.
 
-> **Runs with versions 1.1.0 to 1.2.0.** These turned every `0/0` at a site into `./.` whenever any one sample there had no reads, which in a large panel is about half of all genotypes. Fixed in 1.2.1. To fix an older merged VCF, rerun with `-resume` (only the merge runs again) or use the repair commands in the pipeline README ("Repairing VCFs from 1.1.0 to 1.2.0").
-
 Without gVCFs it is different. A plain per-sample VCF lists only the sample's variants, so after merging, every sample without a call at a site gets `./.`, whether it had 20 reads matching the reference or none at all. In a diversity panel most variants are rare, so most genotypes end up `./.`, and allele frequencies count only the few samples that carry the variant (a variant in 3 of 291 samples looks fixed, AF = 1). If you ever get a VCF made that way (`--gvcf false`, or an older run), treat `./.` with great care.
 
 > **The merged VCF is not joint-genotyped.** Each sample's genotype is still decided from its own reads; the merge only fills in the reference calls. Full GATK joint genotyping (`GenomicsDBImport` + `GenotypeGVCFs`) also re-evaluates every site across all samples. The gVCFs in `vcf/` are exactly its input, so it can be run later without the GPU step.
