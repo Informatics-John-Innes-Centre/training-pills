@@ -2,6 +2,9 @@
 # category here; anything not listed falls into "Other" automatically, so a
 # new pill never just disappears if this file isn't updated right away.
 
+Getting Started:
+  - informatics-websites
+
 Linux & Command Line:
   - linux-playground
   - linux-basics
