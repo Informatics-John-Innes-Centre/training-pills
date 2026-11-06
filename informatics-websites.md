@@ -69,10 +69,11 @@ Informatics hosts these for JIC groups and their collaborators. Most are public 
 | [wheat-expression.com](https://www.wheat-expression.com) | expVIP for wheat: compare a gene's expression across hundreds of published RNA-seq samples (tissues, development, stress). |
 | [rust-expression.com](https://www.rust-expression.com) | expVIP for the wheat rust fungi, across published infection studies. |
 | [bachberryexp.com](https://www.bachberryexp.com) | expVIP for blackberry and raspberry fruit ripening. |
-| [pea-expression.jic.ac.uk](http://pea-expression.jic.ac.uk) | expVIP for pea (in development). |
+| [pea-expression.jic.ac.uk](https://pea-expression.jic.ac.uk) | expVIP for pea (in development). |
 | [ORDER](https://order.jic.ac.uk) | Oilseed rape (*Brassica napus*) expression during the floral transition. |
 | [Seed ORDER](https://seed-order-brassica.jic.ac.uk) | *Brassica* expression during seed maturation. |
 | [Wheat Spatial](https://www.wheat-spatial.com) | Spatial transcriptomics (MERFISH, 200 genes) of the developing wheat inflorescence. |
+| [GrainX](https://grainx.jic.ac.uk) | Spatial transcriptomics (Stereo-seq) of wheat grains (cv. Cadenza) at 12 and 18 days after flowering. |
 
 **Sequences, genomes and markers**
 
