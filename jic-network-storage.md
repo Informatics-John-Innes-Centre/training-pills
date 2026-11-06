@@ -31,6 +31,7 @@ Your laptop/desktop, any instrument's attached computer, and external drives (US
 | **OneDrive / SharePoint** | Via your Microsoft account | Shared drafts, protocols, SOPs, real-time co-authoring | Raw bioinformatics data or large file trees — it breaks metadata, chokes bandwidth, and triggers endless sync conflicts |
 | **Computing shared folders** | `\\files`, `\\ji-cfs2`, manual mapping | Team-shared documents | Big data — quota is small and it isn't designed for it |
 | **HPC storage (Isilon)** | `\\jic-hpc-data`, manual mapping/mounting | Sequencing data, assemblies, anything a bioinformatics pipeline reads or writes | — this is the one built for it: 40+ PB across the institute |
+| **HPC archive** | `\\jic-archive-data`, manual mapping/mounting | Finished data you need to keep long term (on the HPC it's `/jic/archive`) | Active work: run your pipelines on scratch |
 
 If you're not sure which to use: documents and protocols go in OneDrive/SharePoint; anything your pipeline touches goes on the HPC storage.
 
@@ -47,6 +48,8 @@ Pick a free drive letter, and set the folder to the path you were given, e.g.:
 ```
 
 Tick **Reconnect at sign-in** so it's there again next time you log in, then **Finish**.
+
+The archive works the same way: map a second drive with the server `\\jic-archive-data` instead of `\\jic-hpc-data`. On macOS and Linux, swap the server name in the same way (`smb://jic-archive-data/...`, `//jic-archive-data/...`).
 
 ## 4. Accessing HPC storage from macOS
 
@@ -98,13 +101,14 @@ Same server, same share, same data — just a different separator and prefix per
 | Shared drafts/protocols, co-authoring | OneDrive / SharePoint |
 | Team shared documents | Computing shared folders (`\\files`, `\\ji-cfs2`) |
 | Sequencing data, assemblies, pipeline I/O | HPC storage / Isilon (`\\jic-hpc-data`) |
+| Finished data kept long term | HPC archive (`\\jic-archive-data`) |
 | Map it on Windows | File Explorer → **…** → **Map network drive** |
 | Connect on macOS | Finder → **Go** → **Connect to Server…** (`⌘K`), `smb://...` |
 | Mount on Linux | `sudo mount.cifs //jic-hpc-data/<share> <local-dir>/ -o domain=nr4,user=$(id -un),uid=$(id -u)` |
 
 ## Practice exercise
 
-- [ ] Identify which of the four storage locations your current project's raw data should live on
+- [ ] Identify which of the storage locations your current project's raw data should live on
 - [ ] Map or mount the HPC storage from your own machine, following the section for your OS
 - [ ] Create a test file in it and confirm you can see it again after reconnecting/remounting
 - [ ] Check what's currently sitting only on your local machine or an external drive, and move anything irreplaceable onto a backed-up location
