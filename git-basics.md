@@ -71,6 +71,8 @@ Your computer                 JIC GitLab
 
 In this tutorial, you will first work locally and then push your repository to GitLab.
 
+> **JIC's GitLab:** `git.nbi.ac.uk` is the NBI GitLab server. It's reachable from anywhere on the NBI network, including the HPC login nodes, so `git clone`/`git push`/`git pull` against a `git.nbi.ac.uk` URL work the same whether you're on your own machine or already logged into the HPC.
+
 ## 3. Create your first repository
 
 You'll use a small example research project:
