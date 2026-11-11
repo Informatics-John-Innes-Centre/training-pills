@@ -11,6 +11,7 @@ By the end of this tutorial, you will be able to:
 - Know which partition to use for downloading data onto HPC storage
 - Understand why `/jic/archive` is read-only almost everywhere except one set of nodes
 - Know who to talk to if you want your group to have a Data Champion
+- Run an archiving transfer from a `jic-data-mover` node inside `tmux`, using `rsync`
 
 The main idea to take away:
 
@@ -41,9 +42,39 @@ Writing to the archive only works from one set of nodes: **`jic-data-mover01`** 
 | `/jic/archive` | Read-only | Read-write (Data Champions only) |
 | `/jic/scratch`, `/jic/research-groups`, etc. | Read-write | Read-only |
 
+The read/write split is the only thing that changes on a `jic-data-mover` node — storage performance is the same as on scratch, so there's no speed penalty for archiving from there instead of from a login node.
+
 `/jic/archive` also keeps snapshots, the same mechanism covered in the [Recovering Deleted Files from Snapshots](recovering-deleted-files-snapshots.md) pill — so even archived data that gets overwritten or removed by mistake has a recovery path.
 
-## 4. Why it's worth it
+## 4. A typical archiving workflow
+
+Putting it together, archiving a finished run from scratch into `/jic/archive` as a Data Champion looks like this:
+
+```text
+your laptop → ssh → HPC login node → ssh → jic-data-mover0X → tmux + rsync
+```
+
+```bash
+# 1. SSH into the HPC as normal
+ssh hpc.nbi.ac.uk
+
+# 2. From the login node, SSH into one of the data-mover nodes
+ssh jic-data-mover01
+
+# 3. Start a named tmux session so the transfer survives a dropped connection
+tmux new -s archive
+
+# 4. Run the transfer with rsync, trailing slash on both sides, -P for
+#    progress and resumability
+rsync -a -P "/jic/scratch/${GROUP}/${SAMPLE}/" "/jic/archive/${GROUP}/${SAMPLE}/"
+
+# 5. Detach once it's running (Ctrl-b, then d) and check back later
+tmux attach -t archive
+```
+
+This is the same `tmux`/`rsync` pairing covered in the [tmux Basics](tmux-basics.md) and [rsync Basics](rsync-basics.md) pills, just run from a `jic-data-mover` node instead of the login node so the write to `/jic/archive` is actually permitted. Everything those two pills teach — naming sessions, detaching/reattaching, the trailing-slash rule, resuming an interrupted transfer by re-running the exact same command — applies unchanged here.
+
+## 5. Why it's worth it
 
 This two-way read-only split means a single person's mistake — a wrong path in an `rm` or an `rsync` run from the wrong place — can't simultaneously destroy both your live working copy and your archived copy. Moving data into long-term storage is treated as its own deliberate step through a narrow, controlled gate, not something that happens as a side effect of everyday work on a login node.
 
@@ -56,12 +87,14 @@ This two-way read-only split means a single person's mistake — a wrong path in
 | I'm a Data Champion — can I still edit my group's scratch data from a data-mover node? | No — scratch/research-groups areas are read-only there on purpose |
 | I accidentally deleted or overwrote something in the archive | Check its snapshots — see the snapshot-recovery pill |
 | My group doesn't have a Data Champion yet | Ask JIC Informatics (informatics@jic.ac.uk) |
+| I'm archiving a large transfer as a Data Champion | `ssh` to a `jic-data-mover` node, start a `tmux` session, run `rsync -a -P SRC/ DEST/` inside it — see the tmux and rsync pills |
 
 ## Practice exercise
 
 - [ ] Find out whether your research group already has a Data Champion
 - [ ] Try browsing `/jic/archive` from a normal login node and confirm it's read-only for you
 - [ ] If you are a Data Champion, confirm you can reach a `jic-data-mover` node and that the working areas are read-only there
+- [ ] If you are a Data Champion, SSH into a `jic-data-mover` node, start a named `tmux` session, and run a test `rsync -a -P` transfer into `/jic/archive` inside it
 
 ---
 
