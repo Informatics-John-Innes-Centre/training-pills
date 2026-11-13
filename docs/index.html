@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>JIC Informatics — Links</title>
-<meta name="description" content="Tools, training and help from JIC Informatics">
+<meta name="description" content="Data management, tools, training and help from JIC Informatics">
 <link rel="icon" href="static/favicon.svg" type="image/svg+xml">
 <link rel="icon" href="static/favicon-32.png" type="image/png" sizes="32x32">
 <style>
@@ -34,6 +34,7 @@
   .link-group h2 { font-size: 12px; font-weight: 600; color: var(--muted);
     text-transform: uppercase; letter-spacing: .06em; margin-bottom: 10px; }
   .link-group .note { font-size: 11px; color: var(--muted); margin: -4px 0 10px; }
+  .featured h2 { color: var(--accent); }
   .link-btn {
     display: flex; align-items: center; gap: 12px;
     background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
@@ -41,6 +42,7 @@
     transition: border-color .15s, transform .15s;
   }
   .link-btn:hover { border-color: var(--accent); transform: translateY(-1px); }
+  .featured .link-btn { border-width: 2px; border-color: var(--accent); }
   .link-btn .label { flex-grow: 1; }
   .link-btn .name { font-size: 14px; font-weight: 600; }
   .link-btn .desc { font-size: 12px; color: var(--muted); margin-top: 2px; }
@@ -50,8 +52,6 @@
     vertical-align: middle; white-space: nowrap; }
   .tag-login { background: var(--amber); color: #1c2333; }
   .tag-vpn { background: var(--red); color: #fff; }
-  .tag-legacy { background: var(--teal); color: #1c2333; }
-  .vpn-section .link-btn { opacity: .72; }
   .legend { text-align: center; color: var(--muted); font-size: 12px; margin-top: 8px; }
   .legend .tag { margin-left: 4px; margin-right: 2px; }
   footer { text-align: center; color: var(--muted); font-size: 12px; padding: 24px; }
@@ -69,22 +69,102 @@
 <main class="linktree">
   <img class="linktree-logo" id="logo" src="static/JIC_Informatics-black.png" alt="JIC Informatics">
   <h1>JIC Informatics</h1>
-  <p class="sub">Tools, training and help from the Informatics team</p>
+  <p class="sub">Data management, tools, training and help</p>
 
-  <p class="banner">Scanning this from outside the John Innes Centre? The links below work for you.
-    <strong>JIC staff</strong> on the NBI network or VPN also get the internal tools further down the page.</p>
+  <p class="banner">Bookmark this page. Some links work from anywhere; others (tagged <span class="tag tag-vpn">VPN</span>) only work on the NBI network or VPN — come back to this same page once you're connected.</p>
 
   <nav class="jump">
+    <a href="#tools">Tools</a><a href="#training">Training</a><a href="#other">Other tools</a>
     <a href="#gene">Gene expression</a><a href="#seq">Sequences &amp; markers</a>
-    <a href="#research">Other research</a><a href="#training">Training</a>
-    <a href="#help">Help</a><a href="#internal">Internal (VPN)</a>
+    <a href="#research">Other research</a><a href="#hpc">HPC services</a><a href="#help">Help</a>
   </nav>
+
+  <div class="link-group featured" id="data-management">
+    <h2>Data management</h2>
+    <a class="link-btn" href="https://jic-datamanagement.informatics.jic.ac.uk" target="_blank" rel="noopener">
+      <span class="label"><span class="name">Great Data Management<span class="tag tag-vpn">VPN</span></span>
+        <span class="desc">Storage use and stale data, by group and project</span></span>
+      <span class="arrow">→</span>
+    </a>
+    <a class="link-btn" href="https://jic-datamanagement.informatics.jic.ac.uk/data-management" target="_blank" rel="noopener">
+      <span class="label"><span class="name">Data Management Guide<span class="tag tag-vpn">VPN</span></span>
+        <span class="desc">Storage, backups, sharing data and public archives</span></span>
+      <span class="arrow">→</span>
+    </a>
+    <a class="link-btn" href="https://intranet.nbi.ac.uk/" target="_blank" rel="noopener">
+      <span class="label"><span class="name">Data Management Training<span class="tag tag-vpn">VPN</span></span>
+        <span class="desc">Next session: 2 December — register on the intranet</span></span>
+      <span class="arrow">→</span>
+    </a>
+  </div>
 
   <div class="link-group">
     <h2>Start here</h2>
+    <a class="link-btn" href="https://informatics.jic.ac.uk" target="_blank" rel="noopener">
+      <span class="label"><span class="name">Informatics HUB<span class="tag tag-vpn">VPN</span></span>
+        <span class="desc">Everything the team offers, in one place</span></span>
+      <span class="arrow">→</span>
+    </a>
+  </div>
+
+  <div class="link-group" id="tools">
+    <h2>Your HPC jobs</h2>
+    <a class="link-btn" href="https://job-stats.informatics.jic.ac.uk" target="_blank" rel="noopener">
+      <span class="label"><span class="name">HPC Job Stats<span class="tag tag-vpn">VPN</span></span>
+        <span class="desc">What your Slurm jobs cost and how efficiently they ran</span></span>
+      <span class="arrow">→</span>
+    </a>
+  </div>
+
+  <div class="link-group" id="training">
+    <h2>Training</h2>
+    <a class="link-btn" href="https://informatics.jic.ac.uk/training-pills/" target="_blank" rel="noopener">
+      <span class="label"><span class="name">Training Pills<span class="tag tag-vpn">VPN</span></span>
+        <span class="desc">Short self-guided tutorials: Linux, git, Slurm and more</span></span>
+      <span class="arrow">→</span>
+    </a>
+    <a class="link-btn" href="https://repo.informatics.jic.ac.uk" target="_blank" rel="noopener">
+      <span class="label"><span class="name">Training Repo<span class="tag tag-vpn">VPN</span></span>
+        <span class="desc">Exercises, slides and data from our workshops</span></span>
+      <span class="arrow">→</span>
+    </a>
+    <a class="link-btn" href="https://training.jic.ac.uk" target="_blank" rel="noopener">
+      <span class="label"><span class="name">JIC Training Hub</span>
+        <span class="desc">JIC's courses for external scientists and the wider community</span></span>
+      <span class="arrow">→</span>
+    </a>
+    <a class="link-btn" href="https://www.wheat-training.com" target="_blank" rel="noopener">
+      <span class="label"><span class="name">Wheat Training</span>
+        <span class="desc">Resources for anyone starting to work on wheat</span></span>
+      <span class="arrow">→</span>
+    </a>
+  </div>
+
+  <div class="link-group" id="other">
+    <h2>Other Informatics tools</h2>
+    <a class="link-btn" href="https://informatics.jic.ac.uk/platform-advice/" target="_blank" rel="noopener">
+      <span class="label"><span class="name">Platform Advice<span class="tag tag-vpn">VPN</span></span>
+        <span class="desc">Describe your work, get matched to the right JIC platform</span></span>
+      <span class="arrow">→</span>
+    </a>
+    <a class="link-btn" href="https://drone-data.informatics.jic.ac.uk" target="_blank" rel="noopener">
+      <span class="label"><span class="name">Drone Imagery Data<span class="tag tag-vpn">VPN</span></span>
+        <span class="desc">Orthomosaics from drone flights over field trials</span></span>
+      <span class="arrow">→</span>
+    </a>
     <a class="link-btn" href="https://events.jic.ac.uk" target="_blank" rel="noopener">
       <span class="label"><span class="name">Events</span>
         <span class="desc">Registration for JIC events and courses</span></span>
+      <span class="arrow">→</span>
+    </a>
+    <a class="link-btn" href="https://cross-charging.informatics.jic.ac.uk" target="_blank" rel="noopener">
+      <span class="label"><span class="name">Cross Charging<span class="tag tag-vpn">VPN</span></span>
+        <span class="desc">Internal recharge tracking for Informatics services</span></span>
+      <span class="arrow">→</span>
+    </a>
+    <a class="link-btn" href="https://informatics.jic.ac.uk/web-analytics/" target="_blank" rel="noopener">
+      <span class="label"><span class="name">Web Analytics<span class="tag tag-vpn">VPN</span></span>
+        <span class="desc">Visits dashboard for JIC Informatics sites</span></span>
       <span class="arrow">→</span>
     </a>
   </div>
@@ -125,6 +205,11 @@
 
   <div class="link-group" id="seq">
     <h2>Research databases — Sequences, genomes &amp; markers</h2>
+    <a class="link-btn" href="https://blast.jic.ac.uk" target="_blank" rel="noopener">
+      <span class="label"><span class="name">BLAST<span class="tag tag-vpn">VPN</span></span>
+        <span class="desc">BLAST against about 150 JIC databases</span></span>
+      <span class="arrow">→</span>
+    </a>
     <a class="link-btn" href="https://polymarker.jic.ac.uk" target="_blank" rel="noopener">
       <span class="label"><span class="name">PolyMarker</span>
         <span class="desc">Homoeologue-specific SNP primers for polyploids</span></span>
@@ -159,6 +244,16 @@
 
   <div class="link-group" id="research">
     <h2>Research databases — Other research tools</h2>
+    <a class="link-btn" href="https://omero.nbi.ac.uk" target="_blank" rel="noopener">
+      <span class="label"><span class="name">OMERO<span class="tag tag-vpn">VPN</span></span>
+        <span class="desc">Store, view and share microscopy images</span></span>
+      <span class="arrow">→</span>
+    </a>
+    <a class="link-btn" href="https://mascot.jic.ac.uk" target="_blank" rel="noopener">
+      <span class="label"><span class="name">Mascot<span class="tag tag-vpn">VPN</span></span>
+        <span class="desc">Protein identification from mass spectrometry data</span></span>
+      <span class="arrow">→</span>
+    </a>
     <a class="link-btn" href="https://dedal.jic.ac.uk" target="_blank" rel="noopener">
       <span class="label"><span class="name">DEDAL<span class="tag tag-login">Login</span></span>
         <span class="desc">Drone image processing and plot data, for UK academics and farmers</span></span>
@@ -167,6 +262,11 @@
     <a class="link-btn" href="https://aeciospore-dispersal-model.com" target="_blank" rel="noopener">
       <span class="label"><span class="name">Aeciospore Dispersal Model</span>
         <span class="desc">How stem rust spores spread from barberry</span></span>
+      <span class="arrow">→</span>
+    </a>
+    <a class="link-btn" href="https://chronotopia.informatics.jic.ac.uk" target="_blank" rel="noopener">
+      <span class="label"><span class="name">Chronotopia<span class="tag tag-vpn">VPN</span></span>
+        <span class="desc">Interactive exploration of time-series data</span></span>
       <span class="arrow">→</span>
     </a>
     <a class="link-btn" href="https://streptomyces.org.uk" target="_blank" rel="noopener">
@@ -191,16 +291,27 @@
     </a>
   </div>
 
-  <div class="link-group" id="training">
-    <h2>Training</h2>
-    <a class="link-btn" href="https://training.jic.ac.uk" target="_blank" rel="noopener">
-      <span class="label"><span class="name">JIC Training Hub</span>
-        <span class="desc">JIC's courses for external scientists and the wider community</span></span>
+  <div class="link-group" id="hpc">
+    <h2>HPC services from Research Computing</h2>
+    <p class="note">Run by NBI Research Computing, not Informatics, but used constantly:</p>
+    <a class="link-btn" href="https://software.hpc.nbi.ac.uk" target="_blank" rel="noopener">
+      <span class="label"><span class="name">HPC Software Catalogue<span class="tag tag-vpn">VPN</span></span>
+        <span class="desc">Search HPC software versions and request new ones</span></span>
       <span class="arrow">→</span>
     </a>
-    <a class="link-btn" href="https://www.wheat-training.com" target="_blank" rel="noopener">
-      <span class="label"><span class="name">Wheat Training</span>
-        <span class="desc">Resources for anyone starting to work on wheat</span></span>
+    <a class="link-btn" href="https://ood.hpc.nbi.ac.uk" target="_blank" rel="noopener">
+      <span class="label"><span class="name">Open OnDemand<span class="tag tag-vpn">VPN</span></span>
+        <span class="desc">The HPC in your browser: files, jobs, RStudio, Jupyter</span></span>
+      <span class="arrow">→</span>
+    </a>
+    <a class="link-btn" href="https://dropoff.nbi.ac.uk" target="_blank" rel="noopener">
+      <span class="label"><span class="name">Dropoff</span>
+        <span class="desc">Sending and receiving files too big for email</span></span>
+      <span class="arrow">→</span>
+    </a>
+    <a class="link-btn" href="https://git.nbi.ac.uk" target="_blank" rel="noopener">
+      <span class="label"><span class="name">git.nbi.ac.uk<span class="tag tag-vpn">VPN</span></span>
+        <span class="desc">NBI's GitLab, for code and pipelines</span></span>
       <span class="arrow">→</span>
     </a>
   </div>
@@ -217,81 +328,13 @@
         <span class="desc">Our public projects and code</span></span>
       <span class="arrow">→</span>
     </a>
-  </div>
-
-  <div class="link-group vpn-section" id="internal">
-    <h2>JIC network / VPN only <span class="tag tag-vpn">Staff</span></h2>
-    <p class="note">These don't resolve outside the NBI network at all — only useful if you're on-site or on VPN.</p>
-    <a class="link-btn" href="https://informatics.jic.ac.uk" target="_blank" rel="noopener">
-      <span class="label"><span class="name">Informatics HUB<span class="tag tag-vpn">VPN</span></span></span>
-      <span class="arrow">→</span>
-    </a>
-    <a class="link-btn" href="https://job-stats.informatics.jic.ac.uk" target="_blank" rel="noopener">
-      <span class="label"><span class="name">HPC Job Stats<span class="tag tag-vpn">VPN</span></span></span>
-      <span class="arrow">→</span>
-    </a>
-    <a class="link-btn" href="https://jic-datamanagement.informatics.jic.ac.uk" target="_blank" rel="noopener">
-      <span class="label"><span class="name">Great Data Management<span class="tag tag-vpn">VPN</span></span></span>
-      <span class="arrow">→</span>
-    </a>
-    <a class="link-btn" href="https://informatics.jic.ac.uk/training-pills/" target="_blank" rel="noopener">
-      <span class="label"><span class="name">Training Pills<span class="tag tag-vpn">VPN</span></span></span>
-      <span class="arrow">→</span>
-    </a>
-    <a class="link-btn" href="https://repo.informatics.jic.ac.uk" target="_blank" rel="noopener">
-      <span class="label"><span class="name">Training Repo<span class="tag tag-vpn">VPN</span></span></span>
-      <span class="arrow">→</span>
-    </a>
-    <a class="link-btn" href="https://informatics.jic.ac.uk/platform-advice/" target="_blank" rel="noopener">
-      <span class="label"><span class="name">Platform Advice<span class="tag tag-vpn">VPN</span></span></span>
-      <span class="arrow">→</span>
-    </a>
-    <a class="link-btn" href="https://drone-data.informatics.jic.ac.uk" target="_blank" rel="noopener">
-      <span class="label"><span class="name">Drone Imagery Data<span class="tag tag-vpn">VPN</span></span></span>
-      <span class="arrow">→</span>
-    </a>
-    <a class="link-btn" href="https://cross-charging.informatics.jic.ac.uk" target="_blank" rel="noopener">
-      <span class="label"><span class="name">Cross Charging<span class="tag tag-vpn">VPN</span></span></span>
-      <span class="arrow">→</span>
-    </a>
-    <a class="link-btn" href="https://informatics.jic.ac.uk/web-analytics/" target="_blank" rel="noopener">
-      <span class="label"><span class="name">Web Analytics<span class="tag tag-vpn">VPN</span></span></span>
-      <span class="arrow">→</span>
-    </a>
-    <a class="link-btn" href="https://blast.jic.ac.uk" target="_blank" rel="noopener">
-      <span class="label"><span class="name">BLAST<span class="tag tag-vpn">VPN</span></span></span>
-      <span class="arrow">→</span>
-    </a>
-    <a class="link-btn" href="https://chronotopia.informatics.jic.ac.uk" target="_blank" rel="noopener">
-      <span class="label"><span class="name">Chronotopia<span class="tag tag-vpn">VPN</span></span></span>
-      <span class="arrow">→</span>
-    </a>
-    <a class="link-btn" href="https://omero.nbi.ac.uk" target="_blank" rel="noopener">
-      <span class="label"><span class="name">OMERO<span class="tag tag-vpn">VPN</span></span></span>
-      <span class="arrow">→</span>
-    </a>
-    <a class="link-btn" href="https://mascot.jic.ac.uk" target="_blank" rel="noopener">
-      <span class="label"><span class="name">Mascot<span class="tag tag-vpn">VPN</span></span></span>
-      <span class="arrow">→</span>
-    </a>
-    <a class="link-btn" href="https://software.hpc.nbi.ac.uk" target="_blank" rel="noopener">
-      <span class="label"><span class="name">HPC Software Catalogue<span class="tag tag-vpn">VPN</span></span></span>
-      <span class="arrow">→</span>
-    </a>
-    <a class="link-btn" href="https://ood.hpc.nbi.ac.uk" target="_blank" rel="noopener">
-      <span class="label"><span class="name">Open OnDemand<span class="tag tag-vpn">VPN</span></span></span>
-      <span class="arrow">→</span>
-    </a>
-    <a class="link-btn" href="https://git.nbi.ac.uk" target="_blank" rel="noopener">
-      <span class="label"><span class="name">git.nbi.ac.uk<span class="tag tag-vpn">VPN</span></span></span>
-      <span class="arrow">→</span>
-    </a>
+    <p class="note">Drop-in sessions every Wednesday, 11:00–12:00, at the REC (Bioinformatics, Python Surgery, AI Clinic). In person: Informatics is on the second floor of Bateson.</p>
   </div>
 
   <p class="legend">
-    <span class="tag tag-login">Login</span> JIC/SSO account needed
+    <span class="tag tag-login">Login</span> JIC/SSO account needed, works from anywhere
     &nbsp;·&nbsp;
-    <span class="tag tag-vpn">VPN</span> NBI network/VPN only — confirmed, doesn't resolve externally
+    <span class="tag tag-vpn">VPN</span> only works on the NBI network or VPN — verified against real public DNS, not guessed
   </p>
 </main>
 
